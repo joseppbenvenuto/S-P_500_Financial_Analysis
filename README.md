@@ -2,23 +2,29 @@
 
 ## Project Description
 
-The analysis explored NHL team season data (url: https://www.kevinsidwar.com/iot/2017/7/1/the-undocumented-nhl-stats-api) from 1983 - 2021 to predict season and playoff outcomes (url: https://www.hockey-reference.com).
+analysis will explore the S&P 500 Index's closing prices (url: https://ca.finance.yahoo.com) within a four-decade time frame. The objective is to analyze the index and determine if the index is a valuable long-term investment.
 
-The season outcomes were calculated by how many adjusted wins a team won (wins + (ties / 2)) above the mean adjusted wins of any given season (season win deviation). The season outcome was calculated this way due to the varying nature of hockey; in some seasons, teams were closer regarding games won, and some had a more significant divide. In addition, some seasons were more extended than other seasons, and by using the adjusted games a team won **(wins + (ties / 2))** above or below the mean adjusted wins of any given season metric, all seasons were included in the analysis despite some seasons having fewer games played (shortened due to strike and pandemic).
+Four decades:
 
-More than 60% of teams make the playoffs, so the analysis set out to predict teams that did not make the playoffs.
+Decade 1: 1979 - 1989<br>
+Decade 2: 1989 - 1999<br>
+Decade 3: 1999 - 2009<br>
+Decade 4: 2009 - 2019<br>
 
-The entirety of the analysis sought to understand the statistical economics of what NHL team organizations can focus on to reach the post-season. 
+The analysis will seek to understand the compounded returns (not including dividends) the index has produced within the above time frames. 
 
-By understanding the economics of what holds teams back from making playoffs, teams can gain more transparency and perspective on what works with strategy and achieving successful campaigns in mind.
+A/B tests will be used to infer if the difference in means of the S&P 500 Index closing prices between decades is statistically significant. The goal is to observe if the closing prices are higher or lower between the time frames and determine the investment risk. 
 
-Achieving successful campaigns can potentially lead to increased revenue for all stakeholders through ticket sales, salary increases, endorsement deals, the fair book value of the organization, greater economic activity for the represented city, etc.<br><br>
+If the prices are higher in each new decade and statistically significant, intuitively, this will be determined to be a positive sign and that the index is producing profits; the opposite is true for the opposite results.
+
+In addition to the above, the analysis will observe other macro and micro economic data trends regarding real U.S GDP (url: https://apps.bea.gov/api/_pdf/bea_web_service_api_user_guide.pdf), S&P 500 Index earnings per share (EPS) (url: https://ca.finance.yahoo.com), average U.S 10-year bond yields (url: https://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data=yield), and average annual U.S inflation rates (url: https://www.usinflationcalculator.com/inflation/historical-inflation-rates) to aid in the analysis.
+
+The analysis can be taken advantage of by any individual or entity looking for a valuable investment opportunity.<br><br>
 
 ## Methods Used
 
-1) Descriptive Statistics - Used for preliminary data exploration.
-2) Multiple Linear Regression - Predict season outcomes (adjusted wins a team won (wins + (ties / 2)) / mean adjusted wins).
-3) Logistic Regression - Used predicted season outcomes to predict playoff outcomes.<br><br>
+1) Descriptive Statistics - used for preliminary data exploration.
+2) Inferential Statistics - used to infer risk in the S&P 500 Index daily closing prices. 
 
 ## Predictions Dashboard
 
