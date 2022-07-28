@@ -74,29 +74,11 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 <br>
 
-* **Regression_Analysis -**  Multiple Linear Regression analysis predicting season outcomes as described by adjusted wins a team won (wins + (ties / 2)) / mean adjusted wins.
+* **EDGAR_API_ETL_Pipeline -**  Wrangles public companmy financial data form the SEC EDGAR API and passes the data through an ETL pipeline to be stored in PostgreSQL database called edgardb.
   
-  * **Data -** Stores the cleaned and wrangled data from the exploratory data analysis.
-  * **Regression_Models -** Stores the Multiple Linear Regression algorithm and data scaling pipeline.
-  * **Preprocessing_Functions.py -** Stored functions used in the analysis.
-  * **Regression_Metrics_Functions.py -** Stored regression functions used in the analysis.
-  * **NHL_1983_2021_Regression_EDA.ipynb -** Jupyter Notebook going through Exploratory data analysis before fitting the Multiple Linear Regression model.
-  * **NHL_1983_2021_Multiple_Linear_Regression.ipynb -** Jupyter Notebook fitting and interpreting the Multiple Linear Regression model.
+  * **Create_Tables_EDGAR.py -** Creates a database called edgardb wtih all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
+  * **SQL_Queries_EDGAR.py -** A file that contains all the necessary SQL queries for the ETL process.
+  * **API_ETL_EDGAR.py -** Warangles data from the SEC EDGAR API and passes it through an ETL process to be stored in edgardb.
+  * **EDGARDB_Test.ipynb -** Jupyter Notebook that runs SQL queries to test edgardb after the data pipeline has been run.
 
   <br>
-  
-* **Classification_Analysis -**  Logistic Regression analysis predicting binary outcomes whether teams make or don't make the playoffs.
-  
-  * **Data -** Stores the cleaned and wrangled data from the exploratory data analysis.
-  * **Classification_Models -** Stores the Logistic Regression algorithm and data scaling pipeline.
-  * **Preprocessing_Functions.py -** Stored functions used in the analysis.
-  * **Classification_Metrics_Functions.py -** Stored classification functions used in the analysis.
-  * **NHL_1983_2021_Classification_EDA.ipynb -** Jupyter Notebook going through Exploratory data analysis before fitting the Logistic Regression model.
-  * **NHL_1983_2021_Logistic_Regression.ipynb -** Jupyter Notebook fitting and interpreting the Logistic Regression model.
-
-    <br>
-  
-* **Dashboard -**  Stores all Plotly Dash app files. The Dashboard app allows the user to calculate NHL and season outcomes using the two algorithms produced in the analysis (regression and classification).
-
-  * **Models -** Stores all the algorithms and scaling pipelines.
-  * **Plotly_Dash_Season_Playoff_Dashboard.py -** Plotly Dash Dashboard app script.
