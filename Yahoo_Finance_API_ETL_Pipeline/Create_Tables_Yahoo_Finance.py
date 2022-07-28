@@ -1,14 +1,14 @@
 import psycopg2 as ps
-from SQL_Queries_EDGAR import *
+from SQL_Queries_Yahoo_Finance import *
 
 ###########################################################################################################################################
-# NEW CODE BLOCK - Create edgardb
+# NEW CODE BLOCK - Create yahoodb
 ###########################################################################################################################################
 
 def create_database():
     """
-    - Creates and connects to the edgardb
-    - Returns the connection and cursor to edgardb
+    - Creates and connects to the yahoodb
+    - Returns the connection and cursor to yahoodb
     """
 
     # connect to default database port: 5432
@@ -24,9 +24,9 @@ def create_database():
     conn.set_session(autocommit = True)
     cur = conn.cursor()
 
-    # create edgardb database with UTF8 encoding
-    cur.execute('DROP DATABASE IF EXISTS edgardb;')
-    cur.execute("CREATE DATABASE edgardb WITH ENCODING 'utf8' TEMPLATE template0;")
+    # create yahoodb database with UTF8 encoding
+    cur.execute('DROP DATABASE IF EXISTS yahoodb;')
+    cur.execute("CREATE DATABASE yahoodb WITH ENCODING 'utf8' TEMPLATE template0;")
 
     # close connection to default database
     conn.close()
@@ -35,7 +35,7 @@ def create_database():
     conn = ps.connect('''
     
         host=localhost
-        dbname=edgardb
+        dbname=yahoodb
         user=postgres
         password=iEchu133
         
@@ -47,7 +47,7 @@ def create_database():
 
 
 ###########################################################################################################################################
-# NEW CODE BLOCK - Create tables in edgardb
+# NEW CODE BLOCK - Create tables in yahoodb
 ###########################################################################################################################################
 
 
@@ -71,9 +71,9 @@ def create_tables(cur, conn):
         
 def create_view(cur, conn):
     """
-    Creates edgar view
+    Creates yahoo view
     """
-    cur.execute(edgard_view_create)
+    cur.execute(yahoo_view_create)
     conn.commit()
     
    ###########################################################################################################################################
@@ -82,10 +82,10 @@ def create_view(cur, conn):
 
 def main():
     """
-    - Drops (if exists) and creates the edgardb database
-    - Establishes connection with the edgardb database and gets cursor to it
+    - Drops (if exists) and creates the yahoodb database
+    - Establishes connection with the yahoo database and gets cursor to it
     - Drops all the tables
-    - Creates all tables needed and edgar view
+    - Creates all tables needed and yahoo view
     - Closes the connection
     """
 
@@ -104,13 +104,13 @@ def main():
             conn = conn
         )
         
-        # Create edgar view 
+        # Create yahoo view 
         create_view(
             cur = cur, 
             conn = conn
         )
         
-        print('Tables have been created: companies, company_financials, financial_accounts, financial_accounts_descriptions, and edgar_view')
+        print('Tables have been created: balance_sheet, income_statement, cash_flow_statement, and yahoo_view')
     
         cur.close()
         conn.close()

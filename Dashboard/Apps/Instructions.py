@@ -22,7 +22,7 @@ layout = html.Div([
         html.Div(
 
             html.P([
-                "The dashboard provides data for 12,394 American publicly traded companies. \
+                "The dashboard provides data for 6,472 American publicly traded companies. \
                  The purpose of the dashboard is to help the user observe multi year company financial data\
                  regarding the balance sheet, income, and cash-flow statements. The user has the choice to choose\
                  accounts from each statement type and the the ten-year trend for the selected account will be displayed\

@@ -20,11 +20,147 @@ import requests
 
 
 ######################################################################################################################
+# NEW BLOCK - Pre app setup
+######################################################################################################################
+
+# # get relative data folder
+# PATH = pathlib.Path(__file__).parent
+# DATA_PATH = PATH.joinpath("../Data").resolve()
+
+# df = pd.read_csv(DATA_PATH.joinpath('US_GAAP_ACC_Numbers.csv'))
+
+# Import edgar data from onedrive
+def create_onedrive_directdownload (onedrive_link):
+    data_bytes64 = base64.b64encode(bytes(onedrive_link, 'utf-8'))
+    data_bytes64_String = data_bytes64.decode('utf-8').replace('/','_').replace('+','-').rstrip("=")
+    resultUrl = f"https://api.onedrive.com/v1.0/shares/u!{data_bytes64_String}/root/content"
+    
+    return resultUrl
+
+df = pd.read_csv(
+    create_onedrive_directdownload(
+        onedrive_link = 'https://1drv.ms/u/s!Aq0DLMt0IS3zgnvh5qdKCptgSSiB?e=OgMvLM'
+    )
+)
+
+# Create starting list of company names
+company = df[['company']]
+company.columns = ['1']
+company = company['1'].unique()
+
+company_list = []
+for comp in company:
+    string = str(comp)
+    company_list.append(string)
+    
+company = company_list
+company.sort()
+company_search_options1 = [{'label': comp, 'value': comp} for comp in company]
+
+
+# Create starting list of financial statement accounts applicable to current set value
+accounts = df.loc[(df['company'] == 'Apple Inc.')]
+accounts = accounts[['field']]
+accounts.columns = ['2']
+accounts = accounts['2'].unique()
+
+account_list = []
+for account in accounts:
+    string = str(account)
+    account_list.append(string)
+    
+accounts = account_list
+accounts.sort()
+accounts_search_options2 = [{'label': account, 'value': account} for account in accounts]
+value = accounts_search_options2[0]
+value = value['value']
+
+
+######################################################################################################################
 # NEW BLOCK - App layout
 ######################################################################################################################
 
 # App layout
 layout = html.Div([
+
+    # Dynamic header by company
+    html.Div([
+
+        html.H2(
+            id = 'header',
+            style = {
+                'padding-top': 50,
+                'padding':10,
+                'margin':0,
+                'font-family':'Arial, Helvetica, sans-serif',
+                'textAlign':'center'
+            }
+        )
+    ]),
+
+    # Compnay dropdown menu
+    html.Div([
+
+        dbc.Row([
+
+            dbc.Col(
+
+                html.H5(
+                    'Choose a Company',
+                    style = {'textAlign':'center'}
+                )
+            ),
+            
+            dbc.Col(
+
+                html.H5(
+                    'Choose an Account',
+                    style = {'textAlign':'center'}
+                )
+            )
+        ]),
+        
+        dbc.Row([
+
+            dbc.Col(
+
+                dcc.Dropdown(
+                    id = 'company',
+                    options = company_search_options1,
+                    value = 'Apple Inc.',
+                    style = {
+                        'border-color': 'black',
+                        'font-size':'90%'
+                    },
+                    persistence = True
+                )
+            ),
+            
+            # Account dropdown menu
+            dbc.Col(
+                dcc.Dropdown(
+                    id = 'account',
+                    optionHeight = 55,
+                    options = accounts_search_options2,
+                    value = value,
+                    style = {
+                        'border-color': 'black',
+                        'font-size':'90%'
+                    },
+                    persistence = True
+                )
+            )
+        ])
+    ],
+        
+        style = {
+            'font-family':'Arial, Helvetica, sans-serif',
+            'padding-top':10,
+            'padding-right':'5%',
+            'padding-left':'5%',
+            'textAlign':'left'
+        }
+    ),
     
     # Live market price for company stock
     html.Div([
@@ -322,7 +458,6 @@ layout = html.Div([
             }
         )
     ])
-    
 ],
     style = {
         'margin':0
@@ -334,20 +469,68 @@ layout = html.Div([
 # NEW BLOCK - App callbacks
 ######################################################################################################################
 
+# App function for dropdown menu
+@app.callback(
+    Output('account','options'),
+    Output('account','value'),
+    Input('company','value')
+)
+
+def field_dropdown(company):
+
+    # Account per company
+    accounts = df.copy()
+    accounts = accounts.loc[(accounts['company'] == company)]
+    accounts = accounts['field'].unique()
+
+    new_accounts = []
+    for account in accounts:
+        string = str(account)
+        new_accounts.append(string)
+        
+    accounts = new_accounts
+    accounts.sort()
+    accounts_search_options2 = [{'label': account, 'value': account} for account in accounts]
+    value = accounts_search_options2[0]
+    value = value['value']
+    
+    return accounts_search_options2, value
+        
+
+# Header update function
+@app.callback(
+    Output('header','children'),
+    Input('company','value')
+)
+
+def name(company):
+    
+    header =  f"{company}"
+
+    return header
+
 
 # Graphics funtion
 @app.callback(
     Output('scat1','figure'),
-    Input('filtered_data', 'data')
+    Input('company','value'),
+    Input('account','value')
 )
 
-def graphs(jsonified_cleaned_data):
+def graphs(company, account):
     
-    filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    filtered_data['fy'] = filtered_data['fy'].astype(int)
-    filtered_data['fy'] = filtered_data['fy'].astype(str)
-    X = filtered_data['fy']
-    y = round(filtered_data['val'], 2)
+    account_vis = df.copy()
+    account_vis = account_vis.loc[
+        (account_vis['company'] == company) & 
+        (account_vis['field'] == account)
+    ]
+    
+    account_vis = account_vis.reset_index(drop = True)
+    
+    account_vis['fy'] = account_vis['fy'].astype(int)
+    account_vis['fy'] = account_vis['fy'].astype(str)
+    X = account_vis['fy']
+    y = round(account_vis['val'], 2)
 
     # Make vis dynamic to show point with only 1 data point and not line
     if len(y) <= 1:
@@ -382,7 +565,7 @@ def graphs(jsonified_cleaned_data):
 
     # Set title
     data1.update_layout(
-        title = str(filtered_data['company'].unique()[0]) + "'s <br>" + str(filtered_data['field'].unique()[0]) + ' Over Years',
+        title = str(company) + "'s <br>" + str(account) + ' Over Years',
         title_font_family = 'Arial, Helvetica, sans-serif',
         title_font_size = 16, 
         title_font_color = 'Black', 
@@ -395,13 +578,20 @@ def graphs(jsonified_cleaned_data):
 # Graphics funtion
 @app.callback(
     Output('account_summary','children'),
-    Input('filtered_data', 'data')
+    Input('company','value'),
+    Input('account','value')
 )
 
-def graphs(jsonified_cleaned_data):
+def graphs(company, account):
     
-    filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    account_summary = filtered_data['description'].unique()[0]
+    account_summary = df.copy()
+    account_summary = account_summary.loc[
+        (account_summary['company'] == company) & 
+        (account_summary['field'] == account)
+    ]
+    
+    account_summary = account_summary.reset_index(drop = True)
+    account_summary = account_summary['description'].unique()[0]
     
     return account_summary
 
@@ -445,13 +635,15 @@ def compute(n_clicks, input1, input2, input3):
     Output('eps','children'),
     Output('eps%','children'),
     Output('company_summary','children'),
-    Input('filtered_data', 'data')
+    Input('company','value')
     )
 
-def stock_data(jsonified_cleaned_data):
+def stock_data(company):
 
-    filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    ticker = filtered_data['ticker'].unique()[0]
+    ticker_df = df.copy()
+    ticker_df = ticker_df.loc[ticker_df['company'] == company]
+    ticker_df = ticker_df.reset_index(drop = True)
+    ticker = ticker_df.loc[0, 'ticker']
 
     # Establish web-scraper
     url = f'https://www.marketwatch.com/investing/stock/{ticker}/profile'

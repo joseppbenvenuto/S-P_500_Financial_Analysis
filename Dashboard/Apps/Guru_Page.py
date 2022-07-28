@@ -115,7 +115,7 @@ layout = html.Div([
     ], 
         
     style = {
-        'padding-top': 135
+        'padding-top': 80
     })
 ])
         

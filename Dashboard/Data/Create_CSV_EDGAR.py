@@ -57,8 +57,16 @@ def edgar_view_csv():
             (edgar_df['fy'] != '') & 
             (edgar_df['ticker'] != 'NaN')
         ]
-
-        edgar_df.to_csv('US_GAAP_ACC_Numbers.csv', index = False)
+    
+        # Change data type to int64 from float64
+        edgar_df['val'] = edgar_df['val'].astype('int64')
+        
+        # Export data
+        edgar_df.to_csv(
+            'US_GAAP_ACC_Numbers.csv', 
+            index = False, 
+            encoding = 'utf8'
+        )
         
         print('US_GAAP_ACC_Numbers.csv created')
         
