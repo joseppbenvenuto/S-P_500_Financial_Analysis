@@ -64,15 +64,13 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 ## Folder & Files & Descriptions
 
-* **API_Web_Scraping_ETL_Pipeline -**  Scarpes data from the web and the NHL API to be put through an ETL process and stored in a PostgreSQL database.
+* **S&P_500_Analysis -**  An analysis of the S&P 500 Index as a long term investment.
   
-  * **Data -** Stores the wrangled data to then be put through an ETL process.
-  * **Create_Tables_NHL.py -** Creates a database called nhldb wtih all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
-  * **SQL_Queries_NHL.py -** A file that contains all the necessary SQL queries for the ETL process.
-  * **API_Web_Scraper_NHL.py -** Webscrapes NHL playoff results (teams that made or didn't make the playoffs) from https://www.hockey-reference.com/ and pulls data from the NHL's API https://www.kevinsidwar.com/iot/2017/7/1/the-undocumented-nhl-stats-api.
-  * **ETL_NHL.py -** Uses the data scraped from the web and pulled from the NHL API stored in the Data folder as CSV files to be processed through the ETL pipeline and stored in PostgreSQL and 2nd normal form.
-  * **All_Modules.py -** Run this for all data pulls and ETL processes. The user will be prompted with questions and needs to respond when prompted. Data validation is in place.
-  * **NHLDB_Test.ipynb -** Jupyter Notebook that runs SQL queries to test nhldb after the data pipeline has been run.
+  * **Data -** Stores the wrangled data to then be analyzed.
+  * **Images -** Holds Jupyter Notebook Mark Down images.
+  * **Preprocessing_Functions.py -** Stored functions used in the analysis.
+  * **Stats_Functions.py -** Stored functions used in the analysis.
+  * **S&P_500_Index_Analysis.ipynb -** An analysis in the S&P 500 Index as a long term investment
 
 <br>
 
