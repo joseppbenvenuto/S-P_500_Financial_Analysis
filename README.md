@@ -1,4 +1,5 @@
-# NHL Linear & Logistic Regression Analysis
+# S&P 500 Financial Analysis
+
 
 ## Project Description
 
