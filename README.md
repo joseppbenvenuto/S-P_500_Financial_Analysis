@@ -64,30 +64,40 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 ## Folder & Files & Descriptions
 
-* **S&P_500_Analysis -**  An analysis of the S&P 500 Index as a long term investment.
+* **S&P_500_Analysis -**  An analysis of the S&P 500 Index as a long-term investment.
   
   * **Data -** Stores the wrangled data to then be analyzed.
   * **Images -** Holds Jupyter Notebook Mark Down images.
   * **Preprocessing_Functions.py -** Stored functions used in the analysis.
   * **Stats_Functions.py -** Stored functions used in the analysis.
-  * **S&P_500_Index_Analysis.ipynb -** An analysis in the S&P 500 Index as a long term investment
+  * **S&P_500_Index_Analysis.ipynb -** An analysis of the S&P 500 Index as a long-term investment
 
 <br>
 
-* **EDGAR_API_ETL_Pipeline -**  Wrangles public companmy financial data form the SEC EDGAR API and passes the data through an ETL pipeline to be stored in PostgreSQL database called edgardb (For Plotly Dash dashboard app).
+* **EDGAR_API_ETL_Pipeline -**  Wrangles public company financial data from the SEC EDGAR API and passes the data through an ETL pipeline to be stored in a PostgreSQL database called edgardb (For Plotly Dash dashboard app).
   
-  * **Create_Tables_EDGAR.py -** Creates a database called edgardb wtih all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
+  * **Create_Tables_EDGAR.py -** Creates a database called edgardb with all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
   * **SQL_Queries_EDGAR.py -** A file that contains all the necessary SQL queries for the ETL process.
   * **API_ETL_EDGAR.py -** Warangles data from the SEC EDGAR API and passes it through an ETL process to be stored in edgardb.
   * **EDGARDB_Test.ipynb -** Jupyter Notebook that runs SQL queries to test edgardb after the data pipeline has been run.
 
   <br>
   
-* **Yahoo_Finance_API_ETL_Pipeline -**  Wrangles public companmy financial data form a Yahoo Finance API and passes the data through an ETL pipeline to be stored in PostgreSQL database called yahoodb (For Plotly Dash dashboard app).
+* **Yahoo_Finance_API_ETL_Pipeline -**  Wrangles public company financial data from a Yahoo Finance API and passes the data through an ETL pipeline to be stored in Pa ostgreSQL database called yahoodb (For Plotly Dash dashboard app).
   
-  * **Create_Tables_Yahoo_Finance.py -** Creates a database called yahoodb wtih all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
+  * **Create_Tables_Yahoo_Finance.py -** Creates a database called yahoodb with all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
   * **SQL_Queries_Yahoo_Finance.py -** A file that contains all the necessary SQL queries for the ETL process.
   * **API_ETL_Yahoo_Finance.py -** Warangles data from the Yahoo Finance API and passes it through an ETL process to be stored in yahoodb.
   * **Create_Tables_Yahoo_Finance.py -** Jupyter Notebook that runs SQL queries to test yahoodb after the data pipeline has been run.
 
   <br>
+  
+* **Dashboard -**  Stores all Plotly Dash app files. The Dashboard app allows the user to view historical financial trends for publicly traded American companies with financial definitions, life stock data, company summaries, company balance sheets, income statements, cash-flow statements, and some educational videos from successful investors.
+  
+  * **Apps -** Stores the different pages that the Plotly Dash dashboard app has.
+  * **Data -** Stores Python scripts that, if run, will pull the edgar_view from edgardb and yahoo_view from yahoodb as CSV files to be used for the app due to lack of recourses such as cloud storage and computing.
+  * **App.py -** Plotly Dash dashboard app file.
+  * **Index.py -** Plotly Dash dashboard app file.
+
+  <br>
+  
