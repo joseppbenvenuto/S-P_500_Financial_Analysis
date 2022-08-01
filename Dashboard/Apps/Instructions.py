@@ -22,15 +22,18 @@ layout = html.Div([
         html.Div(
 
             html.P([
-                "The dashboard provides data for 6,472 American publicly traded companies. \
-                 The purpose of the dashboard is to help the user observe multi year company financial data\
-                 regarding the balance sheet, income, and cash-flow statements. The user has the choice to choose\
-                 accounts from each statement type and the the ten-year trend for the selected account will be displayed\
-                 as a line chart.",
+                "The dashboard provides data for 13,340 American publicly traded companies. The dashboard aims to help users \
+                 observe multi-year company financial data regarding the balance sheet, income, and cash-flow statements. \
+                 The user can choose a company and an account from each statement type, and the trend for the selected account will be \
+                 displayed as a line chart.",
                  html.Br(),
                  html.Br(),
-                "Additionally, the dashboard provides live price, price to earnings, earnings per share, account summary\
-                 and company summary data."
+                "The dashboard provides live stock prices, price-to-earnings, earnings-per-share, and both account and company \
+                 summaries.",
+                 html.Br(),
+                 html.Br(),
+                "Additionally, suppose the user toggles the tab buttons. In that case, they can observe a more structured balance sheet, \
+                 income statement, cash-flow statements per selected company, and links to famous guru sermons."
             ]),
             
             style = {

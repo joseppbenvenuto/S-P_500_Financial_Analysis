@@ -234,7 +234,7 @@ def clean_edgar_data(df_list):
 
 # Processes full data
 #########################################################################
-def process_edgar_data(edgar_df, id_prefix):
+def process_edgar_data(edgar_df, set_ids, id_prefix):
     '''
     - Processes data to insert into PostgreSQL
     - Adds ticker column
@@ -262,12 +262,18 @@ def process_edgar_data(edgar_df, id_prefix):
     # Create empty ticker column
     edgar_df['ticker'] = np.nan
     
-    # Create ids for field and description add a prefix to account for chunking nulling the unique grouping effect
-    edgar_df['financial_acc_id'] = edgar_df.groupby(['cik','field','description']).ngroup()
-    edgar_df['financial_acc_id'] = id_prefix + edgar_df['financial_acc_id']
-    
-    edgar_df['financial_acc_descriptions_id'] = edgar_df.groupby(['cik','field','description']).ngroup()
-    edgar_df['financial_acc_descriptions_id'] = id_prefix + edgar_df['financial_acc_descriptions_id']
+    if set_ids == False:
+        # Create ids for field and description add a prefix to account for chunking nulling the unique grouping effect
+        edgar_df['financial_acc_id'] = 0
+        edgar_df['financial_acc_id'] = id_prefix + edgar_df['financial_acc_id']
+
+        edgar_df['financial_acc_descriptions_id'] = 0
+        edgar_df['financial_acc_descriptions_id'] = id_prefix + edgar_df['financial_acc_descriptions_id']
+        
+    elif set_ids == True:
+        # Reset ids
+        edgar_df['financial_acc_id'] = edgar_df.groupby(['cik','field','description']).ngroup()
+        edgar_df['financial_acc_descriptions_id'] = edgar_df.groupby(['cik','field','description']).ngroup()
     
     # Determine data types
     edgar_df['cik'] = edgar_df['cik'].astype('int')
@@ -284,6 +290,14 @@ def process_edgar_data(edgar_df, id_prefix):
     edgar_df['company'] = edgar_df['company'].astype('object')
     edgar_df['start'] = edgar_df['start'].astype('object')
     
+    # Remove all '|' characters from strings
+    edgar_df['field'] = edgar_df['field'].str.replace('|','')   
+    edgar_df['field'] = edgar_df['field'].str.replace("\\","") 
+    edgar_df['description'] = edgar_df['description'].str.replace('|','')  
+    edgar_df['description'] = edgar_df['description'].str.replace("\\","") 
+    edgar_df['company'] = edgar_df['company'].str.replace('|','')
+    edgar_df['company'] = edgar_df['company'].str.replace("\\","")
+    
     print('Processed full data.')
     
     return edgar_df
@@ -291,12 +305,17 @@ def process_edgar_data(edgar_df, id_prefix):
 
 # Processes companies table
 #########################################################################
-def process_companies_data(edgar_df):
+def process_companies_data(edgar_df, remove_duplicates):
     '''
     - Create companies tables
     '''
     companies_df = edgar_df[['cik','company','ticker']]
-    companies_df = companies_df.drop_duplicates(subset = ['cik'], keep = 'first').reset_index(drop = True)
+    
+    if remove_duplicates == True:
+        companies_df = companies_df.drop_duplicates(subset = ['cik'], keep = 'first').reset_index(drop = True)
+        
+    elif remove_duplicates == False:
+        companies_df = companies_df
     
     print('Processed companies data.')
 
@@ -305,12 +324,17 @@ def process_companies_data(edgar_df):
 
 # Processes financial accounts table
 #########################################################################
-def process_financial_acc_data(edgar_df):
+def process_financial_acc_data(edgar_df, remove_duplicates):
     '''
     - Create financial accounts table
     '''
     financial_acc_df = edgar_df[['financial_acc_id','field']]
-    financial_acc_df = financial_acc_df.drop_duplicates(subset = ['financial_acc_id'], keep = 'first').reset_index(drop = True)
+    
+    if remove_duplicates == True:
+        financial_acc_df = financial_acc_df.drop_duplicates(subset = ['financial_acc_id'], keep = 'first').reset_index(drop = True)
+        
+    elif remove_duplicates == False:
+        financial_acc_df = financial_acc_df
     
     print('Processed financial_accounts data.')
 
@@ -319,12 +343,17 @@ def process_financial_acc_data(edgar_df):
 
 # Processes financial accounts descriptions table
 #########################################################################
-def process_financial_acc_descriptions_data(edgar_df):
+def process_financial_acc_descriptions_data(edgar_df, remove_duplicates):
     '''
     - Create financial accounts table
     '''
     financial_acc_descriptions_df = edgar_df[['financial_acc_descriptions_id','description']]
-    financial_acc_descriptions_df = financial_acc_descriptions_df.drop_duplicates(subset = ['financial_acc_descriptions_id'], keep = 'first').reset_index(drop = True)
+    
+    if remove_duplicates == True:
+        financial_acc_descriptions_df = financial_acc_descriptions_df.drop_duplicates(subset = ['financial_acc_descriptions_id'], keep = 'first').reset_index(drop = True)
+        
+    elif remove_duplicates == False:
+        financial_acc_descriptions_df = financial_acc_descriptions_df
     
     print('Processed financial_accounts_descriptions data.')
 
@@ -361,9 +390,43 @@ def process_company_financials_data(edgar_df):
 # NEW BLOCK - Insert data into edgardb
 ######################################################################################################################
 
-# Insert data line by line for conflict conditions
+# Insert companies
 #########################################################################
 def insert_companies_data(companies_df, conn, cur):
+    '''
+    - Inserts data into the companies table in edgardb
+    - This is a bulk import maximizing speed and memory to adjust for the large number of rows
+    '''
+    # Stream cleaned data in bulk to database
+    try:
+        sio = StringIO()
+        
+        sio.write(companies_df.to_csv(
+            index = None,
+            header = None,
+            sep = '\t'
+        ))
+        
+        sio.seek(0)
+
+        cur.copy_from(
+            file = sio,
+            table = 'companies',
+            columns = companies_df.columns,
+            sep = '\t'
+            )
+            
+        conn.commit()
+
+        print('Companies data inserted in bulk to egardb successfully 1.')
+        print(' '.join(['Rows inserted:', str(companies_df.shape[0])]))
+
+    except ps.Error as e:
+        print('Insert Companies data error:')
+        print(e)
+
+# Insert companies data with replacement on cik conflict for ticker additions
+def insert_companies_data_tickers(companies_df, conn, cur):
     '''
     - Insert companies data
     '''
@@ -382,67 +445,93 @@ def insert_companies_data(companies_df, conn, cur):
     print(' '.join(['Columns inserted:', str(companies_df.shape[1])]))
 
     
-# Insert data line by line for conflict conditions
+# Insert financial accounts
 #########################################################################
 def insert_financial_acc_data(financial_acc_df, conn, cur):
     '''
-    - Insert financial accounts data
+    - Inserts data into the financial_accounts table in edgardb
+    - This is a bulk import maximizing speed and memory to adjust for the large number of rows
     '''
+    # Stream cleaned data in bulk to database
     try:
-        for index, row in financial_acc_df.iterrows():
-            cur.execute(financial_acc_table_insert, list(row))
-            
-            conn.commit()
+        sio = StringIO()
+        
+        sio.write(financial_acc_df.to_csv(
+            index = None,
+            header = None,
+            sep = '\t'
+        ))
+        
+        sio.seek(0)
 
-        print('Financial Accounts data inserted line-by-line into edgardb successfully 1')
+        cur.copy_from(
+            file = sio,
+            table = 'financial_accounts',
+            columns = financial_acc_df.columns,
+            sep = '\t'
+            )
+            
+        conn.commit()
+
+        print('Financial Accounts data inserted in bulk to egardb successfully 1.')
+        print(' '.join(['Rows inserted:', str(financial_acc_df.shape[0])]))
 
     except ps.Error as e:
-        print('\n Error:')
+        print('Insert Financial Accounts data error:')
         print(e)
-
-    print(' '.join(['Columns inserted:', str(financial_acc_df.shape[1])]))
     
     
-# Insert data line by line for conflict conditions
+# Insert financial accounts descriptions
 #########################################################################
 def insert_financial_acc_descriptions_data(financial_acc_descriptions_df, conn, cur):
     '''
-    - Insert financial accounts descriptions data
+    - Inserts data into the financial_accounts_descriptions table in edgardb
+    - This is a bulk import maximizing speed and memory to adjust for the large number of rows
     '''
+    # Stream cleaned data in bulk to database
     try:
-        for index, row in financial_acc_descriptions_df.iterrows():
-            cur.execute(financial_acc_descriptions_table_insert, list(row))
-            
-            conn.commit()
+        sio = StringIO()
+        
+        sio.write(financial_acc_descriptions_df.to_csv(
+            index = None,
+            header = None,
+            sep = '\t'
+        ))
+        
+        sio.seek(0)
 
-        print('Financial Accounts Descriptions data inserted line-by-line into edgardb successfully 1')
+        cur.copy_from(
+            file = sio,
+            table = 'financial_accounts_descriptions',
+            columns = financial_acc_descriptions_df.columns,
+            sep = '\t'
+            )
+            
+        conn.commit()
+
+        print('Financials Accounts Descriptions data inserted in bulk to egardb successfully 1.')
+        print(' '.join(['Rows inserted:', str(financial_acc_descriptions_df.shape[0])]))
 
     except ps.Error as e:
-        print('\n Error:')
+        print('Insert Financials Accounts Descriptions data error:')
         print(e)
-
-    print(' '.join(['Columns inserted:', str(financial_acc_descriptions_df.shape[1])]))
     
 
 # Insering company financials
 #########################################################################
 def insert_company_financials_data(company_financials_df, conn, cur):
     '''
-    - Inserts company financials data into the company_financials table in edgardb
+    - Inserts data into the company_financials table in edgardb
     - This is a bulk import maximizing speed and memory to adjust for the large number of rows
     '''
     # Stream cleaned data in bulk to database
     try:
-        # Drop table to reinsert in bulk
-        # cur.execute(company_financials_table_drop_rows)
-        # conn.commit()
-
         sio = StringIO()
         
         sio.write(company_financials_df.to_csv(
             index = None,
             header = None,
-            sep = '|'
+            sep = '\t'
         ))
         
         sio.seek(0)
@@ -451,7 +540,7 @@ def insert_company_financials_data(company_financials_df, conn, cur):
             file = sio,
             table = 'company_financials',
             columns = company_financials_df.columns,
-            sep = '|'
+            sep = '\t'
             )
             
         conn.commit()
@@ -523,12 +612,13 @@ def run_edgar_chunks(file_num, chunk_size, zip_file, conn, cur):
             # Process data
             edgar_df = process_edgar_data(
                 edgar_df = edgar_df,
+                set_ids = False,
                 id_prefix = 0
             )
             
-            companies_df = process_companies_data(edgar_df = edgar_df)
-            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df)
-            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df)
+            companies_df = process_companies_data(edgar_df = edgar_df, remove_duplicates = True)
+            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df, remove_duplicates = False)
+            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df, remove_duplicates = False)
             company_financials_df = process_company_financials_data(edgar_df = edgar_df)
             
             # Insert data in edgardb
@@ -567,12 +657,13 @@ def run_edgar_chunks(file_num, chunk_size, zip_file, conn, cur):
             # Process data
             edgar_df = process_edgar_data(
                 edgar_df = edgar_df,
+                set_ids = False,
                 id_prefix = 0
             )
             
-            companies_df = process_companies_data(edgar_df = edgar_df)
-            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df)
-            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df)
+            companies_df = process_companies_data(edgar_df = edgar_df, remove_duplicates = True)
+            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df, remove_duplicates = False)
+            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df, remove_duplicates = False)
             company_financials_df = process_company_financials_data(edgar_df = edgar_df)
             
             # Insert data in edgardb
@@ -660,12 +751,13 @@ def run_edgar_chunks(file_num, chunk_size, zip_file, conn, cur):
             # Process data
             edgar_df = process_edgar_data(
                 edgar_df = edgar_df,
+                set_ids = False,
                 id_prefix = 0
             )
             
-            companies_df = process_companies_data(edgar_df = edgar_df)
-            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df)
-            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df)
+            companies_df = process_companies_data(edgar_df = edgar_df, remove_duplicates = True)
+            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df, remove_duplicates = False)
+            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df, remove_duplicates = False)
             company_financials_df = process_company_financials_data(edgar_df = edgar_df)
             
             # Insert data in edgardb
@@ -704,12 +796,13 @@ def run_edgar_chunks(file_num, chunk_size, zip_file, conn, cur):
             # Process data
             edgar_df = process_edgar_data(
                 edgar_df = edgar_df,
+                set_ids = False,
                 id_prefix = 0
             )
             
-            companies_df = process_companies_data(edgar_df = edgar_df)
-            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df)
-            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df)
+            companies_df = process_companies_data(edgar_df = edgar_df, remove_duplicates = True)
+            financial_acc_df = process_financial_acc_data(edgar_df = edgar_df, remove_duplicates = False)
+            financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_df, remove_duplicates = False)
             company_financials_df = process_company_financials_data(edgar_df = edgar_df)
             
             # Insert data in edgardb
@@ -745,7 +838,7 @@ def run_edgar_chunks(file_num, chunk_size, zip_file, conn, cur):
         else:
             print('No data to add for this chunk')
             pass
-            
+        
         print(' '.join(['File chunk size', str(chunk_size), 'files']))
         print(' '.join(['File Count: ', str(chunk_index_end)]))
     
@@ -760,6 +853,7 @@ def run_edgar_etl_pipeline(zip_file, ticker_file):
     - Adds ticker data
     '''
     # Connect to database
+    #########################################################################
     try:
         conn = ps.connect('''
         
@@ -778,6 +872,24 @@ def run_edgar_etl_pipeline(zip_file, ticker_file):
         print('\n Database Error:')
         print(e)
         
+    # Clear table data
+    #########################################################################
+    try:
+        cur.execute(companies_table_drop_rows)
+        cur.execute(financial_acc_table_drop_rows)
+        cur.execute(financial_acc_descriptions_table_drop_rows)
+        cur.execute(company_financials_table_drop_rows)
+        conn.commit()
+        
+        print('Cleared table data')
+        
+    except ps.Error as e:
+        print('\n Table Reset Error:')
+        print(e)
+    
+    
+    # Parse EDGAR API
+    #########################################################################
     # Get number of json company stats files
     file_len = get_files_length(
         zip_file = zip_file
@@ -793,10 +905,11 @@ def run_edgar_etl_pipeline(zip_file, ticker_file):
     )
     
     print('*******************************************************************************')
-    print('Adding Tickers')
+    print('Adding Tickers and Resetting IDs')
     print('*******************************************************************************') 
     
     # Add tickers
+    #########################################################################
     # Get companies table
     query = '''
     
@@ -837,18 +950,99 @@ def run_edgar_etl_pipeline(zip_file, ticker_file):
     
     # Export final data
     # Insert data in edgardb
-    insert_companies_data(
+    insert_companies_data_tickers(
         companies_df = acc_stats_df, 
         conn = conn, 
         cur = cur
     )
+    
+    # Remove duplicates and set ids for financial accounts and descriptions
+    #########################################################################
+    # Get companies table
+    query = '''
+    
+        SELECT *
+        FROM edgar_view_pre;
+    
+    '''
+
+    cur.execute(query)
+    edgar_view_pre_df = cur.fetchall()
+
+    edgar_view_pre_columns = [
+        'cik',
+        'company',
+        'ticker',
+        'end',
+        'accn',
+        'fp',
+        'form',
+        'filed',
+        'start',
+        'val',
+        'fy',
+        'frame',
+        'financial_acc_id',
+        'field',
+        'financial_acc_descriptions_id',
+        'description'
+    ]
+
+    # Convert companies table to pandas data frame
+    edgar_view_pre_df = pd.DataFrame(edgar_view_pre_df, columns = edgar_view_pre_columns)
+    
+    # Process data
+    edgar_view_pre_df = process_edgar_data(
+        edgar_df = edgar_view_pre_df,
+        set_ids = True,
+        id_prefix = 0
+    )
+
+    financial_acc_df = process_financial_acc_data(edgar_df = edgar_view_pre_df, remove_duplicates = True)
+    financial_acc_descriptions_df = process_financial_acc_descriptions_data(edgar_df = edgar_view_pre_df, remove_duplicates = True)
+    company_financials_df = process_company_financials_data(edgar_df = edgar_view_pre_df)
+    
+
+    # Insert data in edgardb
+    try:
+        cur.execute(financial_acc_table_drop_rows)
+        cur.execute(financial_acc_descriptions_table_drop_rows)
+        cur.execute(company_financials_table_drop_rows)
+        conn.commit()
+        
+        print('Cleared table data')
+        
+    except ps.Error as e:
+        print('\n Table Reset Error:')
+        print(e)
+        
+    # Financial accounts
+    insert_financial_acc_data(
+        financial_acc_df = financial_acc_df, 
+        conn = conn, 
+        cur = cur
+    )
+
+    # Financial account descriptions
+    insert_financial_acc_descriptions_data(
+        financial_acc_descriptions_df = financial_acc_descriptions_df, 
+        conn = conn, 
+        cur = cur
+    )
+
+    # Company financials
+    insert_company_financials_data(
+       company_financials_df = company_financials_df, 
+       conn = conn, 
+       cur = cur
+    ) 
     
     # Close database connection
     cur.close()
     conn.close()
     
     
-    print('Duplicates are removed')
+    print('IDs reset')
     print('Tickers added')
     print('Program complete')
 

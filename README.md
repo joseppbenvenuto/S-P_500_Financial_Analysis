@@ -83,15 +83,6 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
   <br>
   
-* **Yahoo_Finance_API_ETL_Pipeline -**  Wrangles public company financial data from a Yahoo Finance API and passes the data through an ETL pipeline to be stored in Pa ostgreSQL database called yahoodb (For Plotly Dash dashboard app).
-  
-  * **Create_Tables_Yahoo_Finance.py -** Creates a database called yahoodb with all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
-  * **SQL_Queries_Yahoo_Finance.py -** A file that contains all the necessary SQL queries for the ETL process.
-  * **API_ETL_Yahoo_Finance.py -** Warangles data from the Yahoo Finance API and passes it through an ETL process to be stored in yahoodb.
-  * **Create_Tables_Yahoo_Finance.py -** Jupyter Notebook that runs SQL queries to test yahoodb after the data pipeline has been run.
-
-  <br>
-  
 * **Dashboard -**  Stores all Plotly Dash app files. The Dashboard app allows the user to view historical financial trends for publicly traded American companies with financial definitions, life stock data, company summaries, company balance sheets, income statements, cash-flow statements, and some educational videos from successful investors.
   
   * **Apps -** Stores the different pages that the Plotly Dash dashboard app has.
@@ -100,4 +91,3 @@ The analysis can be taken advantage of by any individual or entity looking for a
   * **Index.py -** Plotly Dash dashboard app file.
 
   <br>
-  
