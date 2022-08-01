@@ -344,9 +344,9 @@ layout = html.Div([
 def graphs(jsonified_cleaned_data):
     
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    filtered_data['fy'] = filtered_data['fy'].astype(int)
-    filtered_data['fy'] = filtered_data['fy'].astype(str)
-    X = filtered_data['fy']
+    filtered_data['frame'] = filtered_data['frame'].astype(int)
+    filtered_data['frame'] = filtered_data['frame'].astype(str)
+    X = filtered_data['frame']
     y = round(filtered_data['val'], 2)
 
     # Make vis dynamic to show point with only 1 data point and not line

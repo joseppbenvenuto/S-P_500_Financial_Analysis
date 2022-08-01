@@ -1,13 +1,9 @@
 from dash import html, dash_table, Input, Output
 from App import app
 import pandas as pd
+import yahoo_fin.stock_info as si
+from datetime import date
 
-
-# place_holder_df = pd.DataFrame([{'Account': '-', 'Year': '-'}])
-# data = place_holder_df.to_dict('records')
-# columns = [{'id': c, 'name': c} for c in place_holder_df.columns]
-
-df = pd.read_csv('https://archive.org/download/us-financial-statements/US_Financial_Statements.csv')
 
 layout = html.Div([
     
@@ -43,81 +39,122 @@ def balance_sheet(jsonified_cleaned_data):
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
     ticker = filtered_data['ticker'].unique()[0]
     
-    # Filter for ticker
-    table = df.copy()
-    table = table.loc[
-        (table['ticker'] == ticker) & 
-        (table['financial_statement_type'] == 'Balance Sheet')
-    ]
-    
-    # Pivot table
-    table = table.pivot(
-        index = ['financial_statement_type','financial_accounts','ticker'], 
-        columns = ['date'],
-        values = ['financial_values']
-    )
-    
-    # Rename columns to remove multi-index column names
-    table = table.reset_index()
+    try:
+        # Balance Sheet
+        table = si.get_balance_sheet(ticker)
+        table = table[table.columns[::-1]]
+        col_names = table.columns.astype(str)
+        table = table.reset_index()
+        table.columns = ['Breakdown'] + list(col_names)
+        table['Breakdown'] = table['Breakdown'].str.replace( r"([A-Z])", r" \1").str.strip().str.title()
 
-    table.columns = [
-        'financial_statement_type',
-        'Account',
-        'ticker',
-        '2018',
-        '2019',
-        '2020',
-        '2021'
-    ]
-    
-    # Select columns
-    table = table[[
-        'Account',
-        '2018',
-        '2019',
-        '2020',
-        '2021'
-    ]]
-    
-    # Reset index
-    table = table.set_index(['Account'])
-    
-    # Reindex rows
-    table = table.reindex([
-        'Cash',
-        'Short Term Investments',
-        'Net Receivables',
-        'Inventory',
-        'Other Current Assets',
-        'Total Current Assets',
-        '',
-        'Long Term Investments',
-        'Property Plant Equipment',
-        'Net Tangible Assets',
-        'Intangible Assets',
-        'Other Assets',
-        'Total Assets',
-        '',
-        'Accounts Payable'
-        'Other Current Liab',
-        'Total Current Liabilities',
-        '',
-        'Long Term Debt',
-        'Deferred Long Term Asset Charges',
-        'Other Liab',
-        'Total Liab',
-        '',
-        'Common Stock',
-        'Capital Surplus',
-        'Retained Earnings',
-        'Treasury Stock',
-        'Total Stockholder Equity',
-        '',
-        'Minority Interest',
-        'Other Stockholder Equity'
-    ])
-    
-    table = table.fillna('').reset_index()
+        # Melt data to fit table and adjust for future data
+        table = pd.melt(
+            table,
+            id_vars = 'Breakdown', 
+            value_vars = table.columns[1:5],
+            var_name = 'date', 
+            value_name = 'financial_values'
+        )
+        
+        table['financial_values'] = table['financial_values'].fillna(0)
+        table['financial_values'] = table['financial_values'].astype(int)
+        table['financial_values'] = table.apply(lambda x: "{:,}".format(x['financial_values']), axis = 1)
+        table['date'] = table['date'].str.split('-').str[0]
+
+        # Pivot table
+        table = table.pivot(
+            index = 'Breakdown', 
+            columns = 'date',
+            values = 'financial_values'
+        )
+
+        # Rename columns to remove multi-index column names
+        table = table.reset_index()
+
+        table = table.rename(columns = {'Breakdown': 'Account'})
+
+        # Reset index
+        table = table.set_index(['Account'])
+        
+        # Reindex rows
+        table = table.reindex([
+            'Cash',
+            'Short Term Investments',
+            'Net Receivables',
+            'Inventory',
+            'Other Current Assets',
+            'Total Current Assets',
+            'Long Term Investments',
+            'Property Plant Equipment',
+            'Net Tangible Assets',
+            'Intangible Assets',
+            'Other Assets',
+            'Total Assets',
+            'Accounts Payable'
+            'Other Current Liab',
+            'Total Current Liabilities',
+            'Long Term Debt',
+            'Deferred Long Term Asset Charges',
+            'Other Liab',
+            'Total Liab',
+            'Common Stock',
+            'Capital Surplus',
+            'Retained Earnings',
+            'Treasury Stock',
+            'Total Stockholder Equity',
+            'Minority Interest',
+            'Other Stockholder Equity'
+        ])
+
+        table = table.fillna('')
+
+        # Reindex rows
+        table = table.reindex([
+            'Cash',
+            'Short Term Investments',
+            'Net Receivables',
+            'Inventory',
+            'Other Current Assets',
+            'Total Current Assets',
+            '',
+            'Long Term Investments',
+            'Property Plant Equipment',
+            'Net Tangible Assets',
+            'Intangible Assets',
+            'Other Assets',
+            'Total Assets',
+            '',
+            'Accounts Payable'
+            'Other Current Liab',
+            'Total Current Liabilities',
+            '',
+            'Long Term Debt',
+            'Deferred Long Term Asset Charges',
+            'Other Liab',
+            'Total Liab',
+            '',
+            'Common Stock',
+            'Capital Surplus',
+            'Retained Earnings',
+            'Treasury Stock',
+            'Total Stockholder Equity',
+            '',
+            'Minority Interest',
+            'Other Stockholder Equity'
+        ])
+
+        table = table.fillna('').reset_index()
+
+    except:
+        
+        table = pd.DataFrame([{
+            'Account': '-',
+            str(date.today().year - 4): '-',
+            str(date.today().year - 3): '-',
+            str(date.today().year - 2): '-',
+            str(date.today().year - 1): '-'
+        }])
     
     # Return table
     return html.Div([

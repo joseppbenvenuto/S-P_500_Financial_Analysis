@@ -1,13 +1,9 @@
 from dash import html, dash_table, Input, Output
 from App import app
 import pandas as pd
+import yahoo_fin.stock_info as si
+from datetime import date
 
-
-# place_holder_df = pd.DataFrame([{'Account': '-', 'Year': '-'}])
-# data = place_holder_df.to_dict('records')
-# columns = [{'id': c, 'name': c} for c in place_holder_df.columns]
-
-df = pd.read_csv('https://archive.org/download/us-financial-statements/US_Financial_Statements.csv')
 
 layout = html.Div([
     
@@ -43,79 +39,116 @@ def balance_sheet(jsonified_cleaned_data):
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
     ticker = filtered_data['ticker'].unique()[0]
     
-    # Filter for ticker
-    table = df.copy()
-    table = table.loc[
-        (table['ticker'] == ticker) & 
-        (table['financial_statement_type'] == 'Income Statement')
-    ]
-    
-    # Pivot table
-    table = table.pivot(
-        index = ['financial_statement_type','financial_accounts','ticker'], 
-        columns = ['date'],
-        values = ['financial_values']
-    )
-    
-    # Rename columns to remove multi-index column names
-    table = table.reset_index()
+    try:
+        # Income statement
+        table = si.get_income_statement(ticker)
+        table = table[table.columns[::-1]]
+        col_names = table.columns.astype(str)
+        table = table.reset_index()
+        table.columns = ['Breakdown'] + list(col_names)
+        table['Breakdown'] = table['Breakdown'].str.replace( r"([A-Z])", r" \1").str.strip().str.title()
 
-    table.columns = [
-        'financial_statement_type',
-        'Account',
-        'ticker',
-        '2018',
-        '2019',
-        '2020',
-        '2021'
-    ]
-    
-    # Select columns
-    table = table[[
-        'Account',
-        '2018',
-        '2019',
-        '2020',
-        '2021'
-    ]]
-    
-    # Reset index
-    table = table.set_index(['Account'])
+        # Melt data to fit table and adjust for future data
+        table = pd.melt(
+            table,
+            id_vars = 'Breakdown', 
+            value_vars = table.columns[1:5],
+            var_name = 'date', 
+            value_name = 'financial_values'
+        )
+        
+        table['financial_values'] = table['financial_values'].fillna(0)
+        table['financial_values'] = table['financial_values'].astype(int)
+        table['financial_values'] = table.apply(lambda x: "{:,}".format(x['financial_values']), axis = 1)
+        table['date'] = table['date'].str.split('-').str[0]
 
-    # Reindex rows
-    table = table.reindex([
-        'Total Revenue',
-        'Cost Of Revenue',
-        'Gross Profit',
-        '',
-        'Other Operating Expenses',
-        'Selling General Administrative',
-        'Research Development',
-        'Total Operating Expenses',    
-        'Operating Income',
-        '',
-        'Interest Expense', 
-        'Total Other Income Expense Net',
-        '',
-        'Income Before Tax',
-        'Income Tax Expense',
-        '',
-        'Net Income From Continuing Ops',
-        'Discontinued Operations',
-        '',
-        'Minority Interest',
-        '',
-        'Net Income',
-        'Net Income Applicable To Common Shares',
-        '',
-        'Ebit',
-        'Effect Of Accounting Charges',
-        'Extraordinary Items',
-        'Non Recurring',
-        'Other Items'
-    ])
-    
-    table = table.fillna('').reset_index()
+        # Pivot table
+        table = table.pivot(
+            index = 'Breakdown', 
+            columns = 'date',
+            values = 'financial_values'
+        )
+
+        # Rename columns to remove multi-index column names
+        table = table.reset_index()
+
+        table = table.rename(columns = {'Breakdown': 'Account'})
+        
+        # Reset index
+        table = table.set_index(['Account'])
+
+        # Reindex rows
+        table = table.reindex([
+            'Total Revenue',
+            'Cost Of Revenue',
+            'Gross Profit',
+            'Other Operating Expenses',
+            'Selling General Administrative',
+            'Research Development',
+            'Total Operating Expenses',    
+            'Operating Income',
+            'Interest Expense', 
+            'Total Other Income Expense Net',
+            'Income Before Tax',
+            'Income Tax Expense',
+            'Net Income From Continuing Ops',
+            'Discontinued Operations',
+            'Minority Interest',
+            'Net Income',
+            'Net Income Applicable To Common Shares',
+            'Ebit',
+            'Effect Of Accounting Charges',
+            'Extraordinary Items',
+            'Non Recurring',
+            'Other Items'
+        ])
+
+        table = table.fillna(0)
+
+        # Reindex rows
+        table = table.reindex([
+            'Total Revenue',
+            'Cost Of Revenue',
+            'Gross Profit',
+            '',
+            'Other Operating Expenses',
+            'Selling General Administrative',
+            'Research Development',
+            'Total Operating Expenses',    
+            'Operating Income',
+            '',
+            'Interest Expense', 
+            'Total Other Income Expense Net',
+            '',
+            'Income Before Tax',
+            'Income Tax Expense',
+            '',
+            'Net Income From Continuing Ops',
+            'Discontinued Operations',
+            '',
+            'Minority Interest',
+            '',
+            'Net Income',
+            'Net Income Applicable To Common Shares',
+            '',
+            'Ebit',
+            'Effect Of Accounting Charges',
+            'Extraordinary Items',
+            'Non Recurring',
+            'Other Items'
+        ])
+
+        table = table.fillna('').reset_index()
+
+    except:
+
+        table = pd.DataFrame([{
+            'Account': '-',
+            str(date.today().year - 4): '-',
+            str(date.today().year - 3): '-',
+            str(date.today().year - 2): '-',
+            str(date.today().year - 1): '-'
+        }])
     
     # Return table
     return html.Div([

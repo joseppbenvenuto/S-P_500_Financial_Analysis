@@ -18,11 +18,43 @@ from Apps import Main_Page, Balance_Sheet, Income_Statement, Cash_Flow_Statement
 # # get relative data folder
 # PATH = pathlib.Path(__file__).parent
 # DATA_PATH = PATH.joinpath("../Data").resolve()
-
 # df = pd.read_csv(DATA_PATH.joinpath('US_GAAP_ACC_Numbers.csv'))
 
-df = pd.read_csv('https://archive.org/download/us-gaap-acc-numbers/US_GAAP_ACC_Numbers.csv', chunksize = 100000)
-df = pd.concat(df)
+# Import data
+company_financials_df = pd.read_csv('https://archive.org/download/company-financials/Company_Financials.csv')
+company_df = pd.read_csv('https://archive.org/download/companies_2022/Companies.csv')
+financial_accounts_df = pd.read_csv('https://archive.org/download/financial-accounts/Financial_Accounts.csv')
+financial_accounts_descriptions_df = pd.read_csv('https://archive.org/download/financial-accounts-descriptions/Financial_Accounts_Descriptions.csv')
+
+df = company_financials_df.merge(
+    company_df, 
+    on = 'cik', 
+    how = 'left'
+)
+
+df = df.merge(
+    financial_accounts_df, 
+    on = 'financial_acc_id', 
+    how = 'left'
+)
+
+df = df.merge(
+    financial_accounts_descriptions_df, 
+    on = 'financial_acc_descriptions_id', 
+    how = 'left'
+)
+
+df = df.drop(
+    [
+        'financial_acc_id',
+        'financial_acc_descriptions_id',
+        'company_financials_id', 
+        'id_x', 
+        'id_y'
+    ],
+    axis = 1,
+    errors = 'ignore'
+)
 
 # Create starting list of company names
 company = df[['company']]

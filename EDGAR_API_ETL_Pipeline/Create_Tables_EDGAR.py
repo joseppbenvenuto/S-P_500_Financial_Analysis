@@ -73,6 +73,7 @@ def create_view(cur, conn):
     """
     Creates edgar view
     """
+    cur.execute(edgard_view_pre_create)
     cur.execute(edgard_view_create)
     conn.commit()
     
@@ -104,13 +105,13 @@ def main():
             conn = conn
         )
         
-        # Create edgar view 
+        # Create edgar views
         create_view(
             cur = cur, 
             conn = conn
         )
         
-        print('Tables have been created: companies, company_financials, financial_accounts, financial_accounts_descriptions, and edgar_view')
+        print('Tables have been created: companies, company_financials, financial_accounts, financial_accounts_descriptions, edgar_view_pre, and edgard_view')
     
         cur.close()
         conn.close()
