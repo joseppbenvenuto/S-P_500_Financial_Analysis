@@ -27,7 +27,7 @@ The analysis can be taken advantage of by any individual or entity looking for a
 1) Descriptive Statistics - used for preliminary data exploration.
 2) Inferential Statistics - used to infer risk in the S&P 500 Index daily closing prices. 
 
-## Predictions Dashboard
+## Financial Trends & Analysis Dashboard
 
 <p><strong>App User Name:</strong> data<br> <strong>App Password:</strong> analyst <br><strong>Note -</strong> the dashboard takes a few seconds to load</p>
 
@@ -37,17 +37,17 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 ## Exploratory Dashboard
 
-* Deployed to Heroku here: https://public.tableau.com/app/profile/josepp8009/viz/NHL_Stats_Dashboard/NHLStatsDashboard<br><br>
+* Deployed to Heroku here: https://public.tableau.com/app/profile/josepp8009/viz/SP500Index_16105134799210/Dashboard<br><br>
 
-![](ReadMe_Images/Tableau.png)<br><br>
+![](ReadMe_Images/Dash.png)<br><br>
 
 ## Presentation Deck
 
-* Deployed here: https://1drv.ms/p/s!Aq0DLMt0IS3zgn72EaqqBGdRCSvd?e=jfOE7U<br><br>
+* Deployed here: https://1drv.ms/p/s!Aq0DLMt0IS3zgn-CDZfrzLUp4SJ6?e=VQfXJj<br><br>
 
 ![](ReadMe_Images/Deck.png)<br><br>
 
-## NNHL Database Documentation Dashboard (open on desktop for macro functionality)
+## EDGAR Database Documentation Dashboard (open on desktop for macro functionality)
 
 * Deployed here: https://1drv.ms/x/s!Aq0DLMt0IS3zgneW6LwCXfqNrkkY?e=h4iwKY<br><br>
 
