@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Excel financialdb documentation
+Financial_DB_Documentation.xlsm
+
+# S&P 500 Index Analysis Presentation Slides
+S-P_500_Index_Slides.pptx
