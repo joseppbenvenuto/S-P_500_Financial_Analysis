@@ -89,7 +89,7 @@ The analysis can be taken advantage of by any individual or entity looking for a
 * **Dashboard -**  Stores all Plotly Dash app files. The Dashboard app allows the user to view historical financial trends for publicly traded American companies with financial definitions, life stock data, company summaries, company balance sheets, income statements, cash-flow statements, and some educational videos from successful investors.
   
   * **Apps -** Stores the different pages that the Plotly Dash dashboard app has.
-  * **Data -** Stores Python scripts that, if run, will pull the edgar_view from edgardb and yahoo_view from yahoodb as CSV files to be used for the app due to lack of recourses such as cloud storage and computing.
+  * **Data -** Stores a Python script that, if run, will pull the financial_statement_view from financialdb as a CSV file to be used for the Financial Trends & Analysis Dashboard web app.
   * **App.py -** Plotly Dash dashboard app file.
   * **Index.py -** Plotly Dash dashboard app file.
 
