@@ -77,7 +77,7 @@ The analysis can be taken advantage of by any individual or entity looking for a
 * **Financial_Statement_API_ETL_Pipeline -**  Wrangles public company financial statement data from https://site.financialmodelingprep.com/developer/docs API and passes the data through an ETL pipeline to be stored in a PostgreSQL database called financialdb (For Plotly Dash dashboard app).
   
   * **Create_Tables_Financial_Statements.py -** Creates a database called financialdb with all needed tables. This file can also be run when the database needs to be rebooted and started from scratch.
-  * **SQL_Queries_EDGAR.py -** A file that contains all the necessary SQL queries for the ETL process.
+  * **SQL_Queries_Financial_Statements.py -** A file that contains all the necessary SQL queries for the ETL process.
   * **API_Financial_Statements.py -** Warangles data from the financial statements  API and stores the data in a newly created folder in the Data folder as a CSV to be made ready to be inserted into financialdb.
   * **Data -** Holds the wrangled data in separate folders from the API.
   * **ETL_Financial_Statements.py -** Passes the wrangled API data through an ETL process to be stored in financialdb.
