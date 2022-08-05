@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore", category = DeprecationWarning)
 # NEW BLOCK - Get financial data functions
 ######################################################################################################################
 
+# https://site.financialmodelingprep.com/developer/docs
 # example@gmail.com: 'key'
 
 # Get balance sheet
