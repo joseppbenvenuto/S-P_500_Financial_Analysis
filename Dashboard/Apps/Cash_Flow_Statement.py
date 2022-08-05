@@ -1,7 +1,6 @@
 from dash import html, dash_table, Input, Output
 from App import app
 import pandas as pd
-import yahoo_fin.stock_info as si
 from datetime import date
 
 
