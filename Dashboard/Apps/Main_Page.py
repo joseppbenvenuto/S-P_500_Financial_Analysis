@@ -6,9 +6,7 @@ import plotly.graph_objs as go
 
 from App import app
 
-import pathlib
 import re
-import base64
 
 import numpy as np
 import numpy_financial as npf
@@ -125,7 +123,6 @@ layout = html.Div([
             dbc.Col(
 
                 dbc.Card(
-
                     dcc.Graph(id = 'scat1'), 
                     body = True, 
                     color = "dark", 
@@ -219,7 +216,7 @@ layout = html.Div([
                         ], 
                             className = 'd-grid gap-2 d-md-block',
                             style = {
-                                'padding-top': 10,
+                                'padding-top': 20,
                                 'padding-left': 10,
                                 'padding-right': 10
                             }
@@ -249,7 +246,8 @@ layout = html.Div([
                     
                     body = True,
                     color = "dark",
-                    outline = True
+                    outline = True,
+                    style = {'height':'37.5vh'}
                 ),
                 
                 width = {
@@ -266,34 +264,6 @@ layout = html.Div([
             'padding-bottom': 30
         }
     ),
-    
-    # Account summary
-    html.Div([
-
-        html.H2(
-            'Account Summary',
-            style = {
-                'padding':10,
-                'padding-top':10,
-                'margin':0,
-                'font-family':'Arial, Helvetica, sans-serif',
-                'background':'#00008B',
-                'color':'#FFFFFF',
-                'textAlign':'center'
-            }
-        ),
-        
-        html.Div(
-            id = 'account_summary',
-            style = {
-                'padding':30,
-                'font-family':'Arial, Helvetica, sans-serif',
-                'line-height':30,
-                'textAlign':'center',
-                'fontSize':20
-            }
-        )
-    ]),
     
     # Company summary
     html.Div([
@@ -336,18 +306,20 @@ layout = html.Div([
 
 
 # Graphics funtion
+#####################################################
 @app.callback(
     Output('scat1','figure'),
-    Input('filtered_data', 'data')
+    Input('filtered_data', 'data'),
+    Input('account_value', 'data')
 )
 
-def graphs(jsonified_cleaned_data):
-    
+def graphs(jsonified_cleaned_data, account_value):
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    filtered_data['frame'] = filtered_data['frame'].astype(int)
-    filtered_data['frame'] = filtered_data['frame'].astype(str)
-    X = filtered_data['frame']
-    y = round(filtered_data['val'], 2)
+    filtered_data = filtered_data.loc[(filtered_data['financial_accounts'] == account_value)].reset_index(drop = True)
+    filtered_data['calendar_year'] = filtered_data['calendar_year'].astype(int)
+    filtered_data['calendar_year'] = filtered_data['calendar_year'].astype(str)
+    X = filtered_data['calendar_year']
+    y = round(filtered_data['financial_values'], 2)
 
     # Make vis dynamic to show point with only 1 data point and not line
     if len(y) <= 1:
@@ -382,7 +354,7 @@ def graphs(jsonified_cleaned_data):
 
     # Set title
     data1.update_layout(
-        title = str(filtered_data['company'].unique()[0]) + "'s <br>" + str(filtered_data['field'].unique()[0]) + ' Over Years',
+        title = str(filtered_data['company'].unique()[0]) + "'s <br>" + str(filtered_data['financial_accounts'].unique()[0]) + ' Over Years',
         title_font_family = 'Arial, Helvetica, sans-serif',
         title_font_size = 16, 
         title_font_color = 'Black', 
@@ -392,21 +364,8 @@ def graphs(jsonified_cleaned_data):
     return data1
 
 
-# Graphics funtion
-@app.callback(
-    Output('account_summary','children'),
-    Input('filtered_data', 'data')
-)
-
-def graphs(jsonified_cleaned_data):
-    
-    filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    account_summary = filtered_data['description'].unique()[0]
-    
-    return account_summary
-
-
 # Compound rate of return function
+#####################################################
 @app.callback(
     Output('output', 'children'),
     Input('submit-val', 'n_clicks'),
@@ -416,7 +375,6 @@ def graphs(jsonified_cleaned_data):
 )
 
 def compute(n_clicks, input1, input2, input3):
-    
     # Set default input values
     if input1 == None:
         input1 = 1
@@ -433,25 +391,27 @@ def compute(n_clicks, input1, input2, input3):
         fv = float(input2)
     )
     
-    solution = round(solution, 2) * 100
+    solution = round(solution * 100, 2)
 
     return '{}%'.format(solution)
 
 
 # Live stock data function
+#####################################################
 @app.callback(
     Output('price','children'),
     Output('pe','children'),
     Output('eps','children'),
     Output('eps%','children'),
     Output('company_summary','children'),
-    Input('filtered_data', 'data')
+    Input('filtered_data', 'data'),
+    Input('ticker_value', 'data')
     )
 
-def stock_data(jsonified_cleaned_data):
-
+def stock_data(jsonified_cleaned_data, ticker_value):
+    # Import parsed data
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    ticker = filtered_data['ticker'].unique()[0]
+    ticker = ticker_value
 
     # Establish web-scraper
     url = f'https://www.marketwatch.com/investing/stock/{ticker}/profile'
@@ -493,7 +453,7 @@ def stock_data(jsonified_cleaned_data):
 
         # Debug
         try:
-            eps_percent = round(float(eps) / float(price), 2) * 100
+            eps_percent = round((float(eps) / float(price)) * 100, 2)
         except (ZeroDivisionError, ValueError):
             eps_percent = '-'
 

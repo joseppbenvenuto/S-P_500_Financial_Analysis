@@ -5,6 +5,10 @@ import yahoo_fin.stock_info as si
 from datetime import date
 
 
+######################################################################################################################
+# NEW BLOCK - App layout
+######################################################################################################################
+
 layout = html.Div([
     
     # Table header
@@ -27,127 +31,102 @@ layout = html.Div([
     ]),
 ])
 
+######################################################################################################################
+# NEW BLOCK - App callbacks
+######################################################################################################################
+
 # Pull 
+#####################################################
 @app.callback(
     Output('balance_sheet','children'),
     Input('filtered_data', 'data')
 )
 
 def balance_sheet(jsonified_cleaned_data):
-    
     # Get filtered data
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    ticker = filtered_data['ticker'].unique()[0]
     
     try:
-        # Balance Sheet
-        table = si.get_balance_sheet(ticker)
-        table = table[table.columns[::-1]]
-        col_names = table.columns.astype(str)
-        table = table.reset_index()
-        table.columns = ['Breakdown'] + list(col_names)
-        table['Breakdown'] = table['Breakdown'].str.replace( r"([A-Z])", r" \1").str.strip().str.title()
+        table = filtered_data.loc[(filtered_data['financial_statement'] == 'Balance Sheet')]
 
-        # Melt data to fit table and adjust for future data
-        table = pd.melt(
-            table,
-            id_vars = 'Breakdown', 
-            value_vars = table.columns[1:5],
-            var_name = 'date', 
-            value_name = 'financial_values'
-        )
-        
-        table['financial_values'] = table['financial_values'].fillna(0)
-        table['financial_values'] = table['financial_values'].astype(int)
+        table = table[[
+            'financial_accounts',
+            'calendar_year',
+            'financial_values'
+        ]]
+
         table['financial_values'] = table.apply(lambda x: "{:,}".format(x['financial_values']), axis = 1)
-        table['date'] = table['date'].str.split('-').str[0]
+        table['calendar_year'] = table['calendar_year'].astype(str)
 
         # Pivot table
         table = table.pivot(
-            index = 'Breakdown', 
-            columns = 'date',
+            index = 'financial_accounts', 
+            columns = 'calendar_year',
             values = 'financial_values'
         )
 
         # Rename columns to remove multi-index column names
         table = table.reset_index()
-
-        table = table.rename(columns = {'Breakdown': 'Account'})
+        table = table.rename(columns = {'financial_accounts': 'Account'})
 
         # Reset index
         table = table.set_index(['Account'])
-        
-        # Reindex rows
-        table = table.reindex([
-            'Cash',
-            'Short Term Investments',
-            'Net Receivables',
-            'Inventory',
-            'Other Current Assets',
-            'Total Current Assets',
-            'Long Term Investments',
-            'Property Plant Equipment',
-            'Net Tangible Assets',
-            'Intangible Assets',
-            'Other Assets',
-            'Total Assets',
-            'Accounts Payable'
-            'Other Current Liab',
-            'Total Current Liabilities',
-            'Long Term Debt',
-            'Deferred Long Term Asset Charges',
-            'Other Liab',
-            'Total Liab',
-            'Common Stock',
-            'Capital Surplus',
-            'Retained Earnings',
-            'Treasury Stock',
-            'Total Stockholder Equity',
-            'Minority Interest',
-            'Other Stockholder Equity'
-        ])
-
-        table = table.fillna('')
 
         # Reindex rows
         table = table.reindex([
-            'Cash',
+            'Cash And Cash Equivalents',
             'Short Term Investments',
+            'Cash And Short Term Investments',
             'Net Receivables',
             'Inventory',
             'Other Current Assets',
             'Total Current Assets',
             '',
-            'Long Term Investments',
-            'Property Plant Equipment',
-            'Net Tangible Assets',
+            'Property Plant Equipment Net',
+            'Goodwill',
             'Intangible Assets',
+            'Goodwill And Intangible Assets',
+            'Long Term Investments',
+            'Tax Assets',
+            'Other Non Current Assets',
+            'Total Non Current Assets',
             'Other Assets',
             'Total Assets',
             '',
-            'Accounts Payable'
-            'Other Current Liab',
+            'Account Payables',
+            'Short Term Debt',
+            'Tax Payables',
+            'Deferred Revenue',
+            'Other Current Liabilities',
             'Total Current Liabilities',
             '',
             'Long Term Debt',
-            'Deferred Long Term Asset Charges',
-            'Other Liab',
-            'Total Liab',
+            'Deferred Revenue Non Current',
+            'Deferred Tax Liabilities Non Current',
+            'Other Non Current Liabilities',
+            'Total Non Current Liabilities',
+            'Other Liabilities',
+            'Capital Lease Obligations',
+            'Total Liabilities',
             '',
+            'Preferred Stock',
             'Common Stock',
-            'Capital Surplus',
             'Retained Earnings',
-            'Treasury Stock',
-            'Total Stockholder Equity',
-            '',
+            'Accumulated Other Comprehensive Income Loss',
+            'Othertotal Stockholders Equity',
+            'Total Stockholders Equity',
+            'Total Liabilities And Stockholders Equity',
             'Minority Interest',
-            'Other Stockholder Equity'
+            'Total Equity',
+            'Total Liabilities And Total Equity',
+            'Total Investments',
+            'Total Debt',
+            'Net Debt'
         ])
 
         table = table.fillna('').reset_index()
-
-    except:
         
+    except:
         table = pd.DataFrame([{
             'Account': '-',
             str(date.today().year - 4): '-',
@@ -155,6 +134,7 @@ def balance_sheet(jsonified_cleaned_data):
             str(date.today().year - 2): '-',
             str(date.today().year - 1): '-'
         }])
+        
     
     # Return table
     return html.Div([
