@@ -1,14 +1,14 @@
 import psycopg2 as ps
-from SQL_Queries_EDGAR import *
+from SQL_Queries_Financial_Statements import *
 
 ###########################################################################################################################################
-# NEW CODE BLOCK - Create edgardb
+# NEW CODE BLOCK - Create financialdb
 ###########################################################################################################################################
 
 def create_database():
     """
     - Creates and connects to the edgardb
-    - Returns the connection and cursor to edgardb
+    - Returns the connection and cursor to financialdb
     """
 
     # connect to default database port: 5432
@@ -24,18 +24,18 @@ def create_database():
     conn.set_session(autocommit = True)
     cur = conn.cursor()
 
-    # create edgardb database with UTF8 encoding
-    cur.execute('DROP DATABASE IF EXISTS edgardb;')
-    cur.execute("CREATE DATABASE edgardb WITH ENCODING 'utf8' TEMPLATE template0;")
+    # create financialdb database with UTF8 encoding
+    cur.execute('DROP DATABASE IF EXISTS financialdb;')
+    cur.execute("CREATE DATABASE financialdb WITH ENCODING 'utf8' TEMPLATE template0;")
 
     # close connection to default database
     conn.close()
 
-    # connect to edgardb database
+    # connect to financialdb database
     conn = ps.connect('''
     
         host=localhost
-        dbname=edgardb
+        dbname=financialdb
         user=postgres
         password=iEchu133
         
@@ -47,7 +47,7 @@ def create_database():
 
 
 ###########################################################################################################################################
-# NEW CODE BLOCK - Create tables in edgardb
+# NEW CODE BLOCK - Create tables in financialdb
 ###########################################################################################################################################
 
 
@@ -71,10 +71,9 @@ def create_tables(cur, conn):
         
 def create_view(cur, conn):
     """
-    Creates edgar view
+    Creates financial statement view
     """
-    cur.execute(edgard_view_pre_create)
-    cur.execute(edgard_view_create)
+    cur.execute(financial_statement_view_create)
     conn.commit()
     
    ###########################################################################################################################################
@@ -83,10 +82,10 @@ def create_view(cur, conn):
 
 def main():
     """
-    - Drops (if exists) and creates the edgardb database
-    - Establishes connection with the edgardb database and gets cursor to it
+    - Drops (if exists) and creates the financialdb database
+    - Establishes connection with the financialdb database and gets cursor to it
     - Drops all the tables
-    - Creates all tables needed and edgar view
+    - Creates all tables needed and financial statement view
     - Closes the connection
     """
 
@@ -105,13 +104,13 @@ def main():
             conn = conn
         )
         
-        # Create edgar views
+        # Create financial statement view
         create_view(
             cur = cur, 
             conn = conn
         )
         
-        print('Tables have been created: companies, company_financials, financial_accounts, financial_accounts_descriptions, edgar_view_pre, and edgard_view')
+        print('Tables have been created: companies, company_financials, financial_accounts, financial_statements, time, and financial_statement_view')
     
         cur.close()
         conn.close()

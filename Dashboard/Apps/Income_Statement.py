@@ -5,6 +5,10 @@ import yahoo_fin.stock_info as si
 from datetime import date
 
 
+######################################################################################################################
+# NEW BLOCK - App layout
+######################################################################################################################
+
 layout = html.Div([
     
     # Table header
@@ -27,115 +31,82 @@ layout = html.Div([
     ]),
 ])
 
+
+######################################################################################################################
+# NEW BLOCK - App callbacks
+######################################################################################################################
+
 # Pull 
+#####################################################
 @app.callback(
     Output('income_statement','children'),
     Input('filtered_data', 'data')
 )
 
-def balance_sheet(jsonified_cleaned_data):
-    
+def income_statement(jsonified_cleaned_data):
     # Get filtered data
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
-    ticker = filtered_data['ticker'].unique()[0]
     
     try:
         # Income statement
-        table = si.get_income_statement(ticker)
-        table = table[table.columns[::-1]]
-        col_names = table.columns.astype(str)
-        table = table.reset_index()
-        table.columns = ['Breakdown'] + list(col_names)
-        table['Breakdown'] = table['Breakdown'].str.replace( r"([A-Z])", r" \1").str.strip().str.title()
+        table = filtered_data.loc[(filtered_data['financial_statement'] == 'Income Statement')]
 
-        # Melt data to fit table and adjust for future data
-        table = pd.melt(
-            table,
-            id_vars = 'Breakdown', 
-            value_vars = table.columns[1:5],
-            var_name = 'date', 
-            value_name = 'financial_values'
-        )
-        
-        table['financial_values'] = table['financial_values'].fillna(0)
-        table['financial_values'] = table['financial_values'].astype(int)
+        table = table[[
+            'financial_accounts',
+            'calendar_year',
+            'financial_values'
+        ]]
+
         table['financial_values'] = table.apply(lambda x: "{:,}".format(x['financial_values']), axis = 1)
-        table['date'] = table['date'].str.split('-').str[0]
+        table['calendar_year'] = table['calendar_year'].astype(str)
 
         # Pivot table
         table = table.pivot(
-            index = 'Breakdown', 
-            columns = 'date',
+            index = 'financial_accounts', 
+            columns = 'calendar_year',
             values = 'financial_values'
         )
 
         # Rename columns to remove multi-index column names
         table = table.reset_index()
+        table = table.rename(columns = {'financial_accounts': 'Account'})
 
-        table = table.rename(columns = {'Breakdown': 'Account'})
-        
         # Reset index
         table = table.set_index(['Account'])
 
         # Reindex rows
         table = table.reindex([
-            'Total Revenue',
+            'Revenue',
             'Cost Of Revenue',
             'Gross Profit',
-            'Other Operating Expenses',
-            'Selling General Administrative',
-            'Research Development',
-            'Total Operating Expenses',    
+            'Gross Profit Ratio',
+            '',
+            'Research And Development Expenses',
+            'General And Administrative Expenses',
+            'Selling And Marketing Expenses',
+            'Selling General And Administrative Expenses',
+            'Other Expenses',
+            'Operating Expenses',
+            'Cost And Expenses',
             'Operating Income',
-            'Interest Expense', 
-            'Total Other Income Expense Net',
+            'Operating Income Ratio',
+            '',
+            'Interest Income',
+            'Interest Expense',
+            'Depreciation And Amortization',
+            'Ebitda',
+            'Ebitdaratio',
+            'Total Other Income Expenses Net',
             'Income Before Tax',
-            'Income Tax Expense',
-            'Net Income From Continuing Ops',
-            'Discontinued Operations',
-            'Minority Interest',
-            'Net Income',
-            'Net Income Applicable To Common Shares',
-            'Ebit',
-            'Effect Of Accounting Charges',
-            'Extraordinary Items',
-            'Non Recurring',
-            'Other Items'
-        ])
-
-        table = table.fillna(0)
-
-        # Reindex rows
-        table = table.reindex([
-            'Total Revenue',
-            'Cost Of Revenue',
-            'Gross Profit',
-            '',
-            'Other Operating Expenses',
-            'Selling General Administrative',
-            'Research Development',
-            'Total Operating Expenses',    
-            'Operating Income',
-            '',
-            'Interest Expense', 
-            'Total Other Income Expense Net',
-            '',
-            'Income Before Tax',
+            'Income Before Tax Ratio',
             'Income Tax Expense',
             '',
-            'Net Income From Continuing Ops',
-            'Discontinued Operations',
-            '',
-            'Minority Interest',
-            '',
             'Net Income',
-            'Net Income Applicable To Common Shares',
-            '',
-            'Ebit',
-            'Effect Of Accounting Charges',
-            'Extraordinary Items',
-            'Non Recurring',
-            'Other Items'
+            'Net Income Ratio',
+            'Eps',
+            'Epsdiluted',
+            'Weighted Average Shs Out',
+            'Weighted Average Shs Out Dil'
         ])
 
         table = table.fillna('').reset_index()

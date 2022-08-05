@@ -1,6 +1,10 @@
 from dash import html
 
 
+######################################################################################################################
+# NEW BLOCK - App layout
+######################################################################################################################
+
 layout = html.Div([
     
     # Instructions
@@ -33,7 +37,10 @@ layout = html.Div([
                  html.Br(),
                  html.Br(),
                 "Additionally, suppose the user toggles the tab buttons. In that case, they can observe a more structured balance sheet, \
-                 income statement, cash-flow statements per selected company, and links to famous guru sermons."
+                 income statement, cash-flow statements per selected company, and links to famous guru sermons.",
+                 html.Br(),
+                 html.Br(),
+                "This tool should be used to analyze any single company along with that company's quarterly or annual filings."
             ]),
             
             style = {

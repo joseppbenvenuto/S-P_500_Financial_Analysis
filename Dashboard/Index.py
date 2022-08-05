@@ -1,7 +1,9 @@
 from dash import html, dcc, Input, Output
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 
 import pandas as pd
+import pathlib
 
 # Connect to main app.py file
 from App import app
@@ -15,76 +17,36 @@ from Apps import Main_Page, Balance_Sheet, Income_Statement, Cash_Flow_Statement
 # NEW BLOCK - Pre app setup
 ######################################################################################################################
 
-# # get relative data folder
-# PATH = pathlib.Path(__file__).parent
-# DATA_PATH = PATH.joinpath("../Data").resolve()
-# df = pd.read_csv(DATA_PATH.joinpath('US_GAAP_ACC_Numbers.csv'))
-
-# Import data
-company_financials_df = pd.read_csv('https://archive.org/download/company-financials/Company_Financials.csv')
-company_df = pd.read_csv('https://archive.org/download/companies_2022/Companies.csv')
-financial_accounts_df = pd.read_csv('https://archive.org/download/financial-accounts/Financial_Accounts.csv')
-financial_accounts_descriptions_df = pd.read_csv('https://archive.org/download/financial-accounts-descriptions/Financial_Accounts_Descriptions.csv')
-
-df = company_financials_df.merge(
-    company_df, 
-    on = 'cik', 
-    how = 'left'
-)
-
-df = df.merge(
-    financial_accounts_df, 
-    on = 'financial_acc_id', 
-    how = 'left'
-)
-
-df = df.merge(
-    financial_accounts_descriptions_df, 
-    on = 'financial_acc_descriptions_id', 
-    how = 'left'
-)
-
-df = df.drop(
-    [
-        'financial_acc_id',
-        'financial_acc_descriptions_id',
-        'company_financials_id', 
-        'id_x', 
-        'id_y'
-    ],
-    axis = 1,
-    errors = 'ignore'
-)
+# get relative data folder
+PATH = pathlib.Path(__file__).parent
+DATA_PATH = PATH.joinpath("../Dashboard/Data").resolve()
+df = pd.read_csv(DATA_PATH.joinpath('Financial_Statement.csv'))
 
 # Create starting list of company names
-company = df[['company']]
-company.columns = ['1']
-company = company['1'].unique()
+company_drop =  df['company'].unique()
 
-company_list = []
-for comp in company:
+company_drop_list = []
+for comp in company_drop:
     string = str(comp)
-    company_list.append(string)
+    company_drop_list.append(string)
     
-company = company_list
-company.sort()
-company_search_options1 = [{'label': comp, 'value': comp} for comp in company]
+company_drop = company_drop_list
+company_drop.sort()
+company_search_options1 = [{'label': comp, 'value': comp} for comp in company_drop]
 
 
 # Create starting list of financial statement accounts applicable to current set value
-accounts = df.loc[(df['company'] == 'Apple Inc.')]
-accounts = accounts[['field']]
-accounts.columns = ['2']
-accounts = accounts['2'].unique()
+accounts_drop = df.loc[(df['company'] == '3M')]
+accounts_drop = accounts_drop['financial_accounts'].unique()
 
-account_list = []
-for account in accounts:
-    string = str(account)
-    account_list.append(string)
+accounts_drop_list = []
+for acc in accounts_drop:
+    string = str(acc)
+    accounts_drop_list.append(string)
     
-accounts = account_list
-accounts.sort()
-accounts_search_options2 = [{'label': account, 'value': account} for account in accounts]
+accounts_drop = accounts_drop_list
+accounts_drop.sort()
+accounts_search_options2 = [{'label': acc, 'value': acc} for acc in accounts_drop]
 value = accounts_search_options2[0]
 value = value['value']
 
@@ -117,100 +79,124 @@ app.layout = html.Div([
     ),
 
     html.Div([
+        
+        dmc.Center(
+        
+            dbc.Row([
 
-        dcc.Link(
+                dbc.Col(
 
-            dbc.Button(
-                'Click for Financial Visulization', 
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'110px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ),
-            href = '/apps/Main_Page', 
-            refresh = False
-        ),
-        
-        dcc.Link(
-            
-            dbc.Button(
-                'Click for Balance Sheet',
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'15px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ), 
-            
-            href = '/apps/Balance_Sheet', 
-            refresh = False
-        ),
-        
-        dcc.Link(
-            
-            dbc.Button(
-                'Click for Income Statement',
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'15px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ), 
-            
-            href = '/apps/Income_Statement', 
-            refresh = False
-        ),
-        
-        dcc.Link(
-            
-            dbc.Button(
-                'Click for Cash-Flow Statement',
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'15px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ), 
-            
-            href = '/apps/Cash_Flow_Statement', 
-            refresh = False
-        ),
-        
-        dcc.Link(
-            
-            dbc.Button(
-                'Click for Guru Educational Videos',
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'15px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ), 
-            
-            href = '/apps/Guru_Page', 
-            refresh = False
-        ),
-        
-        dcc.Link(
+                    dcc.Link(
 
-            dbc.Button(
-                'Click for Application Instructions',
-                style = {
-                    'font-family':'Arial, Helvetica, sans-serif', 
-                    'margin-left':'15px', 
-                    'margin-top':'18px', 
-                    'margin-bottom':'5px'
-                }
-            ), 
-            href = '/apps/Instructions', 
-            refresh = False
-        ),
+                        dbc.Button(
+                            'Click for Financial Visulization', 
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ),
+                        href = '/apps/Main_Page', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+
+                dbc.Col(
+
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Balance Sheet',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+
+                        href = '/apps/Balance_Sheet', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+
+                dbc.Col(
+
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Income Statement',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+
+                        href = '/apps/Income_Statement', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+
+                dbc.Col(
+
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Cash-Flow Statement',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+
+                        href = '/apps/Cash_Flow_Statement', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+
+                dbc.Col(
+
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Guru Educational Videos',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+
+                        href = '/apps/Guru_Page', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+
+                dbc.Col(
+
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Application Instructions',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+                        href = '/apps/Instructions', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                )
+            ], style = {'padding-top': 18})
+        )
     
     ], 
         className = 'd-grid gap-2 d-md-block'
@@ -230,10 +216,34 @@ app.layout = html.Div([
                 'textAlign':'center'
             }
         )
-    ]),
+    ], style = {'padding-top': 10}),
     
     # Compnay dropdown menu
     html.Div([
+        
+        # Radio buttons companies in or out of Value Index
+        html.Div([
+            dcc.RadioItems(
+                id = 'rate',
+                
+                options = [
+                    {'label': 'Balance Sheet', 'value': 1},
+                    {'label': 'Income Statement', 'value': 2},
+                    {'label': 'Cash-Flow Statement', 'value': 3}
+                ],
+                
+                value = 1,
+                labelStyle = {'display': 'inline-block'},
+                inputStyle = {"margin-left": 20},
+                style = {
+                    'textAlign':'center',
+                    'padding-top':10,
+                    'padding-bottom':15,
+                    'padding-right': 15,
+                    'font-family':'Arial, Helvetica, sans-serif'
+                }
+            )
+        ]),
 
         dbc.Row([
 
@@ -261,7 +271,7 @@ app.layout = html.Div([
                 dcc.Dropdown(
                     id = 'company',
                     options = company_search_options1,
-                    value = 'Apple Inc.',
+                    value = '3M',
                     style = {
                         'border-color': 'black',
                         'font-size':'90%'
@@ -304,8 +314,12 @@ app.layout = html.Div([
     # Stores filtered data
     dcc.Store(id = 'filtered_data', storage_type = 'session'),
     
+     # Stores account data
+    dcc.Store(id = 'account_value', storage_type = 'session'),
+    
     # Stores ticker data
-    dcc.Store(id = 'ticker', storage_type = 'session')
+    dcc.Store(id = 'ticker_value', storage_type = 'session')
+    
 ])
 
 
@@ -314,6 +328,7 @@ app.layout = html.Div([
 ######################################################################################################################
 
 # Multi-page functionality
+#####################################################
 @app.callback(
     Output('page-content', 'children'),
     Input('url', 'pathname')
@@ -343,25 +358,48 @@ def display_page(pathname):
 
 
 # App function for dropdown menu and header
+#####################################################
 @app.callback(
     Output('account','options'),
     Output('account','value'),
     Output('header','children'),
-    Input('company','value')
+    Input('company','value'),
+    Input('rate','value')
 )
 
-def field_dropdown(company):
-
+def field_dropdown(company, rate):
     # Account per company
     accounts = df.copy()
-    accounts = accounts.loc[(accounts['company'] == company)]
-    accounts = accounts['field'].unique()
-
+    
+    # Balance Sheet
+    if rate == 1:
+        accounts = accounts.loc[
+            (accounts['company'] == company) & 
+            (accounts['financial_statement'] == 'Balance Sheet')
+        ]
+    
+    # Income Statement
+    if rate == 2:
+        accounts = accounts.loc[
+            (accounts['company'] == company) & 
+            (accounts['financial_statement'] == 'Income Statement')
+        ]    
+        
+    # Cash-Flow Statement
+    if rate == 3:
+        accounts = accounts.loc[
+            (accounts['company'] == company) & 
+            (accounts['financial_statement'] == 'Cash-Flow Statement')
+        ] 
+     
+    
+    # Preprocess search options
+    accounts = accounts['financial_accounts'].unique()
     new_accounts = []
     for account in accounts:
         string = str(account)
         new_accounts.append(string)
-        
+
     accounts = new_accounts
     accounts.sort()
     accounts_search_options2 = [{'label': account, 'value': account} for account in accounts]
@@ -375,27 +413,25 @@ def field_dropdown(company):
 
 
 # Filter data to be used across the app
+#####################################################
 @app.callback(
     Output('filtered_data', 'data'),
-    Output('ticker', 'data'),
+    Output('account_value', 'data'),
+    Output('ticker_value', 'data'),
     Input('company','value'),
     Input('account','value')
 )
 
 def filter_data(company, account):
-    # Filter data
+    # Parse data
     filtered_data = df.copy()
-    filtered_data = filtered_data.loc[
-        (filtered_data['company'] == company) & 
-        (filtered_data['field'] == account)
-    ].reset_index(drop = True)
-    
+    filtered_data = filtered_data.loc[(filtered_data['company'] == company)].reset_index(drop = True)
     ticker = filtered_data['ticker'].unique()[0]
     
-    return filtered_data.to_json(date_format = 'iso', orient = 'split'), ticker
+    return filtered_data.to_json(date_format = 'iso', orient = 'split'), account, ticker
 
 
 if __name__ == '__main__':
-    app.run_server(debug = False)
+    app.run_server()
 
     
