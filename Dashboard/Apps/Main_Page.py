@@ -310,14 +310,28 @@ layout = html.Div([
 @app.callback(
     Output('scat1','figure'),
     Input('filtered_data', 'data'),
-    Input('account_value', 'data')
+    Input('account_value', 'data'),
+    Input('rate_value', 'data')
 )
 
-def graphs(jsonified_cleaned_data, account_value):
+def graphs(jsonified_cleaned_data, account_value, rate_value):
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
+    
+    # Balance Sheet
+    if rate_value == 1:
+        filtered_data = filtered_data.loc[(filtered_data['financial_statement'] == 'Balance Sheet')]
+    
+    # Income Statement
+    if rate_value == 2:
+        filtered_data = filtered_data.loc[(filtered_data['financial_statement'] == 'Income Statement')]    
+        
+    # Cash-Flow Statement
+    if rate_value == 3:
+        filtered_data = filtered_data.loc[(filtered_data['financial_statement'] == 'Cash-Flow Statement')] 
+    
+    
     filtered_data = filtered_data.loc[(filtered_data['financial_accounts'] == account_value)].reset_index(drop = True)
     filtered_data['calendar_year'] = filtered_data['calendar_year'].astype(int)
-    filtered_data['calendar_year'] = filtered_data['calendar_year'].astype(str)
     X = filtered_data['calendar_year']
     y = round(filtered_data['financial_values'], 2)
 
@@ -341,7 +355,7 @@ def graphs(jsonified_cleaned_data, account_value):
                 },
                 'color':'#00008B'
             },
-            name = 'Shares Outstanding'
+            name = 'Accounts'
         ),
 
         layout = go.Layout(
@@ -358,7 +372,11 @@ def graphs(jsonified_cleaned_data, account_value):
         title_font_family = 'Arial, Helvetica, sans-serif',
         title_font_size = 16, 
         title_font_color = 'Black', 
-        title_x = 0.5
+        title_x = 0.5,
+        xaxis_range = [X.min() - 0.5, X.max() + 0.5],
+        xaxis = {
+            'dtick': 1
+        }
     )
 
     return data1

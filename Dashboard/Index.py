@@ -314,11 +314,14 @@ app.layout = html.Div([
     # Stores filtered data
     dcc.Store(id = 'filtered_data', storage_type = 'session'),
     
-     # Stores account data
+    # Stores account data
     dcc.Store(id = 'account_value', storage_type = 'session'),
     
     # Stores ticker data
-    dcc.Store(id = 'ticker_value', storage_type = 'session')
+    dcc.Store(id = 'ticker_value', storage_type = 'session'),
+    
+    # Stores rate data
+    dcc.Store(id = 'rate_value', storage_type = 'session'),
     
 ])
 
@@ -418,17 +421,19 @@ def field_dropdown(company, rate):
     Output('filtered_data', 'data'),
     Output('account_value', 'data'),
     Output('ticker_value', 'data'),
+    Output('rate_value', 'data'),
     Input('company','value'),
-    Input('account','value')
+    Input('account','value'),
+    Input('rate','value')
 )
 
-def filter_data(company, account):
+def filter_data(company, account, rate):
     # Parse data
     filtered_data = df.copy()
     filtered_data = filtered_data.loc[(filtered_data['company'] == company)].reset_index(drop = True)
     ticker = filtered_data['ticker'].unique()[0]
     
-    return filtered_data.to_json(date_format = 'iso', orient = 'split'), account, ticker
+    return filtered_data.to_json(date_format = 'iso', orient = 'split'), account, ticker, rate
 
 
 if __name__ == '__main__':

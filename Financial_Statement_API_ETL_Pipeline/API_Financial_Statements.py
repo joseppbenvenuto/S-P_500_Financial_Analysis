@@ -2,16 +2,16 @@ import pandas  as pd
 from urllib.request import urlopen
 import certifi
 import json
+import time
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category = DeprecationWarning) 
 
 
 ######################################################################################################################
 # NEW BLOCK - Get financial data functions
 ######################################################################################################################
 
-# https://site.financialmodelingprep.com/developer/docs/#Company-Financial-Statements
-# Your API Key : 5975c43ac7d48e3ceeee1063fa8e3c30
+# example@gmail.com: 'key'
 
 # Get balance sheet
 def get_balance_sheet_data(ticker, key):
@@ -57,16 +57,17 @@ def parse_financial_api():
     # Import S&P 500 Index companies
     #####################################################################################################
     tickers_df = pd.read_csv(
-        r"C:\Users\jbenvenuto\Desktop\GitHub_Projects\S&P500_Index_Companies.csv",
+        r"Data/S&P500_Index_Companies.csv",
         sep = ',',
         encoding = 'unicode_escape'
     )
 
     # Convert tickers to list
-    tickers = tickers_df['ticker'].tolist()[0:2]
-    companies = tickers_df['company'].tolist()[0:2]
-    key = '5975c43ac7d48e3ceeee1063fa8e3c30'
+    tickers = tickers_df['ticker'].tolist()
+    companies = tickers_df['company'].tolist()
     
+    # example@gmail.com: 'key'
+    key = 'key' 
     
     # Wrangle API
     #####################################################################################################    
@@ -141,6 +142,8 @@ def parse_financial_api():
         cash_flow_statement_df_list.append(cash_flow_statement)
         
         print(' '.join(['Completed cash-flow statement', str(ticker)]))
+        
+        time.sleep(1.5)
 
         
     # Concat all data per list
