@@ -31,7 +31,7 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 <p><strong>App User Name:</strong> data<br> <strong>App Password:</strong> analyst <br><strong>Note -</strong> the dashboard takes a few seconds to load</p>
 
-* Deployed to Heroku here: https://nhl-dash-app.herokuapp.com/<br><br>
+* Deployed to Heroku here: https://sp-500-fin-app.herokuapp.com/<br><br>
 
 ![](ReadMe_Images/Dash2.png)<br><br>
 
