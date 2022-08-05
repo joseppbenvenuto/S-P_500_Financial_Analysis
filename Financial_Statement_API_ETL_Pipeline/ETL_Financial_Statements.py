@@ -56,6 +56,13 @@ def process_financial_statement_data(df, cur):
     df = df.drop_duplicates(keep = 'first').reset_index(drop = True)
     
     
+    # Clean data types
+    df['financial_values'] = df['financial_values'].astype(np.int64)
+    df = df.dropna(subset = ['calendar_year'])
+    df = df.loc[df['calendar_year'] != '']
+    df['calendar_year'] = df['calendar_year'].astype(int)
+    
+    
     # Create ids
     df['company_id'] = df.groupby(['ticker','company']).ngroup()
     df['financial_accounts_id'] = df.groupby(['financial_accounts']).ngroup()
@@ -83,8 +90,6 @@ def process_financial_statement_data(df, cur):
         axis = 1, 
         errors = 'ignore'
     )
-    
-    fact_df['financial_values'] = fact_df['financial_values'].astype(np.int64)
     print(' '.join(['Processed', str('company_financials')]))
     
     companies_df = df[['company_id','ticker','company','cik']]

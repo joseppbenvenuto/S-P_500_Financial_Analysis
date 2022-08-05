@@ -14,7 +14,7 @@ def main():
 
     print('''
     Module 1:
-    Wrangles data from # https://site.financialmodelingprep.com/developer/docs/#Company-Financial-Statements
+    Wrangles data from https://site.financialmodelingprep.com/developer/docs
     ''')
 
     yesChoice = ['yes','y']
