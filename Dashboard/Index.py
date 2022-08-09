@@ -10,7 +10,7 @@ from App import app
 from App import server
 
 # Connect to your app pages
-from Apps import Main_Page, Balance_Sheet, Income_Statement, Cash_Flow_Statement, Guru_Page, Instructions
+from Apps import Main_Page, Balance_Sheet, Income_Statement, Cash_Flow_Statement, Ratios, Guru_Page, Instructions
 
 
 ######################################################################################################################
@@ -101,7 +101,8 @@ app.layout = html.Div([
                     width = "auto"
 
                 ),
-
+                
+                # Balance Sheet
                 dbc.Col(
 
                     dcc.Link(
@@ -120,7 +121,8 @@ app.layout = html.Div([
                     width = "auto"
 
                 ),
-
+                
+                # Income Statement
                 dbc.Col(
 
                     dcc.Link(
@@ -139,7 +141,8 @@ app.layout = html.Div([
                     width = "auto"
 
                 ),
-
+                
+                # Cash-Flow Statement
                 dbc.Col(
 
                     dcc.Link(
@@ -158,7 +161,28 @@ app.layout = html.Div([
                     width = "auto"
 
                 ),
+                
+                # Ratios
+                dbc.Col(
 
+                    dcc.Link(
+
+                        dbc.Button(
+                            'Click for Financial Ratios',
+                            style = {
+                                'font-family':'Arial, Helvetica, sans-serif', 
+                            }
+                        ), 
+
+                        href = '/apps/Ratios', 
+                        refresh = False
+                    ),
+
+                    width = "auto"
+
+                ),
+                
+                # Gurus
                 dbc.Col(
 
                     dcc.Link(
@@ -178,6 +202,7 @@ app.layout = html.Div([
 
                 ),
 
+                # Application Instructions
                 dbc.Col(
 
                     dcc.Link(
@@ -349,6 +374,9 @@ def display_page(pathname):
 
     if pathname == '/apps/Cash_Flow_Statement':
         return Cash_Flow_Statement.layout
+    
+    if pathname == '/apps/Ratios':
+        return Ratios.layout
     
     if pathname == '/apps/Guru_Page':
         return Guru_Page.layout

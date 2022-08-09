@@ -75,6 +75,7 @@ def income_statement(jsonified_cleaned_data):
 
         # Reindex rows
         table = table.reindex([
+            '',
             'Revenue',
             'Cost Of Revenue',
             'Gross Profit',
@@ -105,7 +106,8 @@ def income_statement(jsonified_cleaned_data):
             'Eps',
             'Epsdiluted',
             'Weighted Average Shs Out',
-            'Weighted Average Shs Out Dil'
+            'Weighted Average Shs Out Dil',
+            ''
         ])
 
         table = table.fillna('').reset_index()
@@ -119,6 +121,7 @@ def income_statement(jsonified_cleaned_data):
             str(date.today().year - 2): '-',
             str(date.today().year - 1): '-'
         }])
+
     
     # Return table
     return html.Div([
@@ -130,10 +133,21 @@ def income_statement(jsonified_cleaned_data):
             style_as_list_view = True,
             style_header = {
                 'font-family':'Arial, Helvetica, sans-serif',
-                'font-size': 18,
+                'font-size': 24,
                 'backgroundColor': 'white',
                 'fontWeight': 'bold'
-            }
+            },
+            style_data_conditional = [
+                {'if': {'filter_query': '{Account} = "Gross Profit"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Gross Profit Ratio"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Operating Income"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Operating Income Ratio"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Income Before Tax"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Income Before Tax Ratio"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Income Tax Expense"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Net Income"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Net Income Ratio"'}, 'fontWeight': 'bold'}
+            ]
         )
     ],
         

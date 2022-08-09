@@ -73,6 +73,7 @@ def balance_sheet(jsonified_cleaned_data):
 
         # Reindex rows
         table = table.reindex([
+            '',
             'Cash And Cash Equivalents',
             'Short Term Investments',
             'Cash And Short Term Investments',
@@ -120,7 +121,8 @@ def balance_sheet(jsonified_cleaned_data):
             'Total Liabilities And Total Equity',
             'Total Investments',
             'Total Debt',
-            'Net Debt'
+            'Net Debt',
+            ''
         ])
 
         table = table.fillna('').reset_index()
@@ -145,10 +147,11 @@ def balance_sheet(jsonified_cleaned_data):
             style_as_list_view = True,
             style_header = {
                 'font-family':'Arial, Helvetica, sans-serif',
-                'font-size': 18,
+                'font-size': 24,
                 'backgroundColor': 'white',
                 'fontWeight': 'bold'
-            }
+            },
+            style_data_conditional = [{'if': {'filter_query': '{Account} contains "Total"' }, 'fontWeight': 'bold'}]
         )
     ],
         
