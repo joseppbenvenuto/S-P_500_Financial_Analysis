@@ -42,7 +42,7 @@ layout = html.Div([
     Input('filtered_data', 'data')
 )
 
-def balance_sheet(jsonified_cleaned_data):
+def cash_flow_statement(jsonified_cleaned_data):
     
     # Get filtered data
     filtered_data = pd.read_json(jsonified_cleaned_data, orient = 'split')
@@ -76,6 +76,7 @@ def balance_sheet(jsonified_cleaned_data):
 
         # Reindex rows
         table = table.reindex([
+            '',
             'Net Income',
             'Depreciation And Amortization',
             'Deferred Income Tax',
@@ -108,7 +109,8 @@ def balance_sheet(jsonified_cleaned_data):
             'Cash At Beginning Of Period',
             'Operating Cash Flow',
             'Capital Expenditure',
-            'Free Cash Flow'
+            'Free Cash Flow',
+            ''
         ])
 
         table = table.fillna('').reset_index()
@@ -133,10 +135,18 @@ def balance_sheet(jsonified_cleaned_data):
             style_as_list_view = True,
             style_header = {
                 'font-family':'Arial, Helvetica, sans-serif',
-                'font-size': 18,
+                'font-size': 24,
                 'backgroundColor': 'white',
                 'fontWeight': 'bold'
-            }
+            },
+            style_data_conditional = [
+                {'if': {'filter_query': '{Account} = "Net Cash Provided By Operating Activities"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Net Cash Used For Investing Activites"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Net Cash Used Provided By Financing Activities"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Operating Cash Flow"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Capital Expenditure"'}, 'fontWeight': 'bold'},
+                {'if': {'filter_query': '{Account} = "Free Cash Flow"'}, 'fontWeight': 'bold'}
+            ]
         )
     ],
         
