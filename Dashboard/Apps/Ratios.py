@@ -746,7 +746,7 @@ def ratios(jsonified_cleaned_data):
             beginning_inventory_list, end_inventory_list
         ):
 
-            purchase = end_inventory + cost_of_rev - beginning_inventory
+            purchase = round(end_inventory + cost_of_rev - beginning_inventory, 2)
 
             try:
                 days_receivable = round(365 * (avg_net_recievables / revenue), 2)
@@ -917,7 +917,7 @@ def ratios(jsonified_cleaned_data):
                 "Days Receivables =  365 * (Avg. Accounts Receivable / Sales)": days_receivable,                    
                 "Days Inventory = 365 * (Avg. Inventory / Cost of Goods Sold)": days_inventory,
                 "Days Payable = 365 * (Avg. Accounts Payable / Purchases)": days_payable,
-                "Net Trade Cycle = Days Receivable + Days Inventory - Days Payable": days_receivable + days_inventory - days_payable,
+                "Net Trade Cycle = Days Receivable + Days Inventory - Days Payable": round(days_receivable + days_inventory - days_payable, 2),
                 "     ":"",
                 "Liquidity Analysis:": "",
                 "Current Ratio = Current Assets / Current Liabilities": current_ratio,         
