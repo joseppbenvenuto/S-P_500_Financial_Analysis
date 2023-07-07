@@ -31,13 +31,13 @@ The analysis can be taken advantage of by any individual or entity looking for a
 
 <p><strong>App User Name:</strong> data<br> <strong>App Password:</strong> analyst <br><strong>Note -</strong> the dashboard takes a few seconds to load</p>
 
-* Deployed to Heroku here: https://sp-500-fin-app.herokuapp.com/<br><br>
+* Deployed to Render here: https://s-p-fin-dash.onrender.com/<br><br>
 
 ![](ReadMe_Images/Dash2.png)<br><br>
 
 ## Exploratory Dashboard
 
-* Deployed to Heroku here: https://public.tableau.com/app/profile/josepp8009/viz/SP500Index_16105134799210/Dashboard<br><br>
+* Deployed to Tableau here: https://public.tableau.com/app/profile/josepp8009/viz/SP500Index_16105134799210/Dashboard<br><br>
 
 ![](ReadMe_Images/Dash.png)<br><br>
 
